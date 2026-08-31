@@ -1,0 +1,44 @@
+{
+	"viewer": {
+		"auth_method": "sso",
+		"is_root": true,
+		"user_id": "0000000000",
+		"user_name": "fixture-user",
+		"account_id": "0000000000",
+		"profile": "agent-plan_cn-beijing_personal",
+		"tenant": "volc",
+		"region": "cn-beijing",
+		"project_name": "fixture-project"
+	},
+	"items": [
+		{
+			"product": "agent-plan",
+			"edition": "personal",
+			"tier": "medium",
+			"subscribed": true,
+			"periods": [
+				{
+					"label": "5h",
+					"used": 505.3618,
+					"total": 10000,
+					"percent": 5.053618,
+					"reset_at": "2026-08-28T20:30:15+08:00"
+				},
+				{
+					"label": "weekly",
+					"used": 23194.5664,
+					"total": 35000,
+					"percent": 66.2701897142857,
+					"reset_at": "2026-08-31T00:00:00+08:00"
+				},
+				{
+					"label": "monthly",
+					"used": 80672.7889,
+					"total": 100000,
+					"percent": 80.6727889,
+					"reset_at": "2026-08-29T23:59:59+08:00"
+				}
+			]
+		}
+	]
+}

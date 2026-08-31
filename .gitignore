@@ -1,0 +1,6 @@
+node_modules/
+.pi/settings.json
+*.tgz
+.DS_Store
+# Pi runtime state and project-scoped extension settings
+.pi/

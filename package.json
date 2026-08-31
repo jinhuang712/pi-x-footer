@@ -1,0 +1,63 @@
+{
+	"name": "pi-x-footer",
+	"version": "0.1.0",
+	"description": "A focused, configurable multi-row Footer for Pi.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jinhuang712/pi-x-footer.git"
+	},
+	"bugs": {
+		"url": "https://github.com/jinhuang712/pi-x-footer/issues"
+	},
+	"homepage": "https://github.com/jinhuang712/pi-x-footer#readme",
+	"type": "module",
+	"license": "MIT",
+	"private": false,
+	"keywords": [
+		"pi-package",
+		"pi-extension",
+		"pi",
+		"footer",
+		"statusline",
+		"usage"
+	],
+	"files": [
+		"src",
+		"dist",
+		"README.md",
+		"assets",
+		"docs",
+		"CHANGELOG.md",
+		"LICENSE",
+		"NOTICE.md"
+	],
+	"pi": {
+		"extensions": [
+			"./dist/index.ts"
+		]
+	},
+	"piExtension": {
+		"lifecycle": "experimental"
+	},
+	"scripts": {
+		"build": "node scripts/build-runtime.mjs",
+		"check": "npm run build && biome check --vcs-use-ignore-file=false src test scripts package.json tsconfig.json README.md && npm run typecheck && npm test",
+		"format": "biome check --write --vcs-use-ignore-file=false src test scripts package.json tsconfig.json README.md",
+		"prepack": "npm run build",
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": ">=0.84.0",
+		"@earendil-works/pi-tui": ">=0.84.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.10",
+		"@earendil-works/pi-coding-agent": "0.84.3",
+		"@earendil-works/pi-tui": "0.84.3",
+		"@types/node": "26.2.0",
+		"esbuild": "0.28.2",
+		"typescript": "7.0.2",
+		"vitest": "4.1.11"
+	}
+}
