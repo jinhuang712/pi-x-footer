@@ -89,12 +89,17 @@ export const BUILTIN_SEGMENTS: readonly FooterSegment[] = [
 	builtin("cwd", ({ snapshot, format, label, display }) => {
 		if (!snapshot.session.cwd) return undefined;
 		const style = display as ProjectDisplayStyle | undefined;
+		// The compact fallback must preserve the project name even when the
+		// configured display is the full path; otherwise responsive fitting
+		// cannot shrink a long path without dropping the whole Segment.
 		const text =
-			style === "name"
+			format === "compact"
 				? compactPath(snapshot.session.cwd, false)
-				: style === "path"
-					? compactPath(snapshot.session.cwd, true)
-					: compactPath(snapshot.session.cwd, format === "detailed");
+				: style === "name"
+					? compactPath(snapshot.session.cwd, false)
+					: style === "path"
+						? compactPath(snapshot.session.cwd, true)
+						: compactPath(snapshot.session.cwd, format === "detailed");
 		return displayContent(label ?? DEFAULT_LABELS.cwd, text, format, "muted");
 	}),
 	builtin("git", ({ snapshot, format, label, display }) =>

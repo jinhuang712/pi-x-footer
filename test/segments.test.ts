@@ -384,6 +384,19 @@ describe("builtin Segment Registry", () => {
 		expect(model?.compactText).toBe("gpt-5.6-luna");
 	});
 
+	it("compacts a full project path to its basename to preserve the project name", () => {
+		const snapshot = snapshotWith({
+			session: { ...createEmptySnapshot().session, cwd: "/Users/jin/dev/project" },
+		});
+		const config = createDefaultConfig();
+		config.preset = "custom";
+		config.segments.cwd.display = "path";
+		const cwd = resolveSegments(snapshot, config, ["cwd"])[0];
+
+		expect(cwd?.text).toBe("Project: /Users/jin/dev/project");
+		expect(cwd?.compactText).toBe("project");
+	});
+
 	it("hides reset text when reset display is disabled", () => {
 		const snapshot = snapshotWith({
 			updatedAt: 0,
