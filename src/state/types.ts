@@ -6,6 +6,8 @@ export interface SessionSnapshot {
 	model?: string;
 	thinkingLevel?: string;
 	cwd: string;
+	/** Home directory for `~` shortening; absent in old snapshots and tests. */
+	home?: string;
 	isStreaming: boolean;
 	turnStartedAt?: number;
 }

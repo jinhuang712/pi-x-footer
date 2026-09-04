@@ -49,7 +49,8 @@ var CACHE_DISPLAY_STYLES = ["read-write-hit", "ratio", "compact"];
 var CACHE_DISPLAY_UI_ORDER = ["compact", "ratio", "read-write-hit"];
 var GIT_DISPLAY_STYLES = ["branch", "status", "full"];
 var GIT_DISPLAY_UI_ORDER = ["branch", "status", "full"];
-var PROJECT_DISPLAY_STYLES = ["name", "path"];
+var PROJECT_DISPLAY_STYLES = ["name", "tilde", "full"];
+var PROJECT_DISPLAY_UI_ORDER = ["name", "tilde", "full"];
 var COST_DISPLAY_STYLES = ["compact", "standard", "full"];
 var COST_DISPLAY_UI_ORDER = ["compact", "standard", "full"];
 var COST_NOTATION_STYLES = ["arrows", "short", "full"];
@@ -132,7 +133,7 @@ var SEGMENT_DEFAULTS = {
   extensions: { priority: 20, required: false }
 };
 var CUSTOM_DEFAULT_DISPLAYS = {
-  cwd: "path",
+  cwd: "tilde",
   git: "full",
   context: "full",
   tokens: "standard",
@@ -154,7 +155,7 @@ var PRESET_SEGMENT_DISPLAYS = {
     provider_usage: "compact"
   },
   balanced: {
-    cwd: "path",
+    cwd: "tilde",
     git: "status",
     context: "hybrid",
     tokens: "standard",
@@ -163,7 +164,7 @@ var PRESET_SEGMENT_DISPLAYS = {
     provider_usage: "standard"
   },
   detailed: {
-    cwd: "path",
+    cwd: "tilde",
     git: "full",
     context: "full",
     tokens: "full",
@@ -354,9 +355,12 @@ function fitRow(row2, left, right, separator, width, strategy = "hide-compact-tr
   const effectiveStrategy = row2.overflow === "compact" ? "compact-hide-truncate" : row2.overflow === "truncate" ? "truncate" : strategy;
   if (effectiveStrategy === "compact-hide-truncate") compactSegments(all());
   if (effectiveStrategy === "truncate") truncateOptional(all(), measure, width);
+  const twoSided = left.length > 0 && right.length > 0;
   while (measure() > width) {
     const optional = all().filter((segment) => !segment.required).sort((leftSegment, rightSegment) => leftSegment.priority - rightSegment.priority);
-    const next = optional[0];
+    const next = optional.find(
+      (candidate) => !wouldEmptyGroup(candidate, fittedLeft, fittedRight, twoSided)
+    );
     if (!next) break;
     removeSegment2(next, fittedLeft, fittedRight);
     hidden.push(next.id);
@@ -365,6 +369,14 @@ function fitRow(row2, left, right, separator, width, strategy = "hide-compact-tr
     compactSegments(all());
   }
   if (measure() > width) truncateOptional(all(), measure, width);
+  if (measure() > width) truncateRequired(all(), measure, width);
+  while (measure() > width) {
+    const optional = all().filter((segment) => !segment.required).sort((leftSegment, rightSegment) => leftSegment.priority - rightSegment.priority);
+    const next = optional[0];
+    if (!next) break;
+    removeSegment2(next, fittedLeft, fittedRight);
+    hidden.push(next.id);
+  }
   if (measure() > width) truncateRequired(all(), measure, width);
   return { left: fittedLeft, right: fittedRight, hidden };
 }
@@ -408,6 +420,12 @@ function truncateByPriority(segments, measure, width) {
     const targetWidth = Math.max(1, currentWidth - overflow);
     if (targetWidth < currentWidth) truncateSegment(segment, targetWidth);
   }
+}
+function wouldEmptyGroup(segment, left, right, twoSided) {
+  if (!twoSided) return false;
+  if (left.includes(segment)) return left.length === 1 && right.length > 0;
+  if (right.includes(segment)) return right.length === 1 && left.length > 0;
+  return false;
 }
 function removeSegment2(segment, left, right) {
   const leftIndex = left.indexOf(segment);
@@ -708,6 +726,15 @@ function compactPath(path, detailed) {
   const parts = normalized.split("/").filter(Boolean);
   return parts.at(-1) ?? (normalized || ".");
 }
+function shortenHome(path, home) {
+  const normalized = path.replaceAll("\\", "/") || ".";
+  if (!home) return normalized;
+  const base = home.replaceAll("\\", "/").replace(/\/+$/u, "");
+  if (!base || base === "/") return normalized;
+  if (normalized === base) return "~";
+  if (normalized.startsWith(`${base}/`)) return `~${normalized.slice(base.length)}`;
+  return normalized;
+}
 
 // src/segments/metadata.ts
 var commonFields = [
@@ -929,7 +956,7 @@ var BUILTIN_SEGMENTS = [
   builtin("cwd", ({ snapshot, format, label, display }) => {
     if (!snapshot.session.cwd) return void 0;
     const style = display;
-    const text = style === "name" ? compactPath(snapshot.session.cwd, false) : style === "path" ? compactPath(snapshot.session.cwd, true) : compactPath(snapshot.session.cwd, format === "detailed");
+    const text = format === "compact" ? compactPath(snapshot.session.cwd, false) : style === "name" ? compactPath(snapshot.session.cwd, false) : style === "full" ? compactPath(snapshot.session.cwd, true) : shortenHome(snapshot.session.cwd, snapshot.session.home);
     return displayContent(label ?? DEFAULT_LABELS.cwd, text, format, "muted");
   }),
   builtin(
@@ -2372,7 +2399,7 @@ function chainRow(label, values, current) {
   return `${label}: ${current} - [${values.join(" / ")}]`;
 }
 var DISPLAY_VALUE_LABELS = {
-  cwd: { name: "folder name", path: "full path" },
+  cwd: { name: "folder name", tilde: "home-relative (~)", full: "full path" },
   context: { compact: "Compact", hybrid: "Hybrid", full: "Full" },
   tokens: { compact: "Compact", standard: "Standard", full: "Full" },
   cost: { compact: "Compact", standard: "Standard", full: "Full" }
@@ -2403,7 +2430,7 @@ function displayUiOrder(id) {
     case "git":
       return GIT_DISPLAY_UI_ORDER;
     case "cwd":
-      return void 0;
+      return PROJECT_DISPLAY_UI_ORDER;
     case "cost":
       return COST_DISPLAY_UI_ORDER;
     case "provider_usage":
@@ -3791,6 +3818,10 @@ var LEGACY_SEGMENT_FIELDS = {
   provider_usage: ["maxWindows"]
 };
 var LEGACY_PRESET_NAMES = { minimal: "compact" };
+var LEGACY_PROJECT_DISPLAY_STYLES = {
+  // Retained only as an input migration: old configs keep rendering `~/…`.
+  path: "tilde"
+};
 var LEGACY_USAGE_DISPLAY_STYLES = {
   // The old display names are retained only as input migrations.
   timed: "detailed",
@@ -4096,6 +4127,19 @@ function normalizeSegments(value, config, diagnostics, presetLocked) {
     if (displayStyles && valueForSegment.display !== void 0) {
       if (isOneOf(valueForSegment.display, displayStyles)) {
         target.display = valueForSegment.display;
+      } else if (id === "cwd" && typeof valueForSegment.display === "string") {
+        const migrated = LEGACY_PROJECT_DISPLAY_STYLES[valueForSegment.display];
+        if (migrated) {
+          target.display = migrated;
+          diagnostics.push(
+            migratedDiagnostic(
+              `${path}.display`,
+              `Project display ${JSON.stringify(valueForSegment.display)} was renamed; using ${JSON.stringify(migrated)}`
+            )
+          );
+        } else {
+          diagnostics.push(invalidDiagnostic(`${path}.display`, "Unknown display preset"));
+        }
       } else if (id === "provider_usage" && typeof valueForSegment.display === "string") {
         const migrated = LEGACY_USAGE_DISPLAY_STYLES[valueForSegment.display];
         if (migrated) {
@@ -4852,12 +4896,14 @@ function isNotRepositoryError(stderr) {
 }
 
 // src/data/session.ts
+import { homedir } from "node:os";
 function createSessionDataSource(store) {
   let sessionGeneration = 0;
   let isStreaming = false;
+  const home = safeHomedir();
   const sync = (context) => {
     store.update({
-      session: sessionSnapshotFromContext(context, isStreaming),
+      session: sessionSnapshotFromContext({ home, ...context }, isStreaming),
       runtime: {
         mode: runtimeModeFromContext(context.mode),
         sessionGeneration
@@ -4898,9 +4944,17 @@ function sessionSnapshotFromContext(context, isStreaming = false) {
     ...context.model?.provider ? { provider: context.model.provider } : {},
     ...context.model?.id ? { model: context.model.id } : {},
     ...context.thinkingLevel ? { thinkingLevel: context.thinkingLevel } : {},
+    ...context.home ? { home: context.home } : {},
     cwd: context.cwd,
     isStreaming
   };
+}
+function safeHomedir() {
+  try {
+    return homedir();
+  } catch {
+    return void 0;
+  }
 }
 function runtimeModeFromContext(mode) {
   if (mode === "tui" || mode === "rpc" || mode === "print" || mode === "json") return mode;

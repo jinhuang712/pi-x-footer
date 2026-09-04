@@ -71,7 +71,7 @@ export const SEGMENT_DEFAULTS: Record<SegmentId, SegmentBuiltInDefaults> = {
 };
 
 const CUSTOM_DEFAULT_DISPLAYS: Partial<Record<SegmentId, string>> = {
-	cwd: "path",
+	cwd: "tilde",
 	git: "full",
 	context: "full",
 	tokens: "standard",
@@ -98,7 +98,7 @@ const PRESET_SEGMENT_DISPLAYS: Record<
 		provider_usage: "compact",
 	},
 	balanced: {
-		cwd: "path",
+		cwd: "tilde",
 		git: "status",
 		context: "hybrid",
 		tokens: "standard",
@@ -107,7 +107,7 @@ const PRESET_SEGMENT_DISPLAYS: Record<
 		provider_usage: "standard",
 	},
 	detailed: {
-		cwd: "path",
+		cwd: "tilde",
 		git: "full",
 		context: "full",
 		tokens: "full",

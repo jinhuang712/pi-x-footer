@@ -29,6 +29,7 @@ interface SessionSnapshot {
   model?: string;
   thinkingLevel?: string;
   cwd: string;
+  home?: string;
   isStreaming: boolean;
   turnStartedAt?: number;
 }

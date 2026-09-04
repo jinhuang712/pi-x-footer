@@ -567,8 +567,9 @@ Project: very-long-pro… · Git: main · dirty · Model: gpt-5.6…
 每个核心信息块都有固定 Display 预设（Custom 模式下选择）：
 
 ```text
-Project:      name (folder name)  -> Project: project
-              path (full path)    -> Project: /Users/jin/dev/project
+Project:      name (folder name)      -> Project: project
+              tilde (home-relative)   -> Project: ~/dev/project
+              full (full path)        -> Project: /Users/jin/dev/project
 
 Git:          status -> Git: main · dirty
               branch -> Git: main

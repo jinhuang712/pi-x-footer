@@ -136,7 +136,7 @@ describe("built-in presets", () => {
 		applyCustomPreset(config);
 
 		expect(config.preset).toBe("custom");
-		expect(config.segments.cwd.display).toBe("path");
+		expect(config.segments.cwd.display).toBe("tilde");
 		expect(config.segments.git.display).toBe("full");
 		expect(config.segments.tokens.display).toBe("standard");
 		expect(config.segments.cache.display).toBe("compact");
@@ -393,7 +393,7 @@ describe("simple show/label categories", () => {
 		const ui = withInput(
 			scripted(
 				"Project \u2014 Show Project \u00b7 Display \u00b7 Label",
-				"Display: full path - [folder name / full path]",
+				"Display: home-relative (~) - [folder name / home-relative (~) / full path]",
 				"Label: Project",
 				"Show Project: Off",
 				undefined,
@@ -402,7 +402,7 @@ describe("simple show/label categories", () => {
 		);
 		const result = await runFooterWizard(customConfig(), ui, save);
 		expect(result.segments.cwd.enabled).toBe(false);
-		expect(result.segments.cwd.display).toBe("path");
+		expect(result.segments.cwd.display).toBe("tilde");
 		expect(result.segments.cwd.label).toBe("Workdir");
 		expect(result.layout.rows.flatMap((row) => [...row.left, ...row.right])).not.toContain("cwd");
 	});

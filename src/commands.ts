@@ -25,6 +25,7 @@ import {
 	ICON_MODES,
 	LABEL_MODES,
 	PRESET_NAMES,
+	PROJECT_DISPLAY_UI_ORDER,
 	type PresetName,
 	SEGMENT_DISPLAY_STYLES,
 	SEGMENT_IDS,
@@ -98,7 +99,7 @@ function chainRow(label: string, values: readonly string[], current: string): st
 }
 
 const DISPLAY_VALUE_LABELS: Partial<Record<SegmentId, Record<string, string>>> = {
-	cwd: { name: "folder name", path: "full path" },
+	cwd: { name: "folder name", tilde: "home-relative (~)", full: "full path" },
 	context: { compact: "Compact", hybrid: "Hybrid", full: "Full" },
 	tokens: { compact: "Compact", standard: "Standard", full: "Full" },
 	cost: { compact: "Compact", standard: "Standard", full: "Full" },
@@ -133,7 +134,7 @@ function displayUiOrder(id: SegmentId): readonly string[] | undefined {
 		case "git":
 			return GIT_DISPLAY_UI_ORDER;
 		case "cwd":
-			return undefined;
+			return PROJECT_DISPLAY_UI_ORDER;
 		case "cost":
 			return COST_DISPLAY_UI_ORDER;
 		case "provider_usage":

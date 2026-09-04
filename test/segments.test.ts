@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createDefaultConfig } from "../src/config/defaults.js";
 import { SEGMENT_IDS } from "../src/config/types.js";
-import { formatCount, formatPercent, sanitizeSegmentText } from "../src/segments/format.js";
+import {
+	formatCount,
+	formatPercent,
+	sanitizeSegmentText,
+	shortenHome,
+} from "../src/segments/format.js";
 import { segmentPreview } from "../src/segments/metadata.js";
 import { createBuiltinSegmentRegistry, resolveSegments } from "../src/segments/registry.js";
 import { createEmptySnapshot } from "../src/state/snapshot.js";
@@ -24,6 +29,16 @@ describe("segment formatters", () => {
 		expect(formatPercent(18.94)).toBe("18.9%");
 		expect(formatPercent(undefined)).toBe("?");
 		expect(sanitizeSegmentText("  model\n\tname \u001b[31m")).toBe("model name [31m");
+	});
+
+	it("shortens home-relative paths without touching other paths", () => {
+		expect(shortenHome("/Users/jin/dev/project", "/Users/jin")).toBe("~/dev/project");
+		expect(shortenHome("/Users/jin", "/Users/jin")).toBe("~");
+		expect(shortenHome("/Users/jin", "/Users/jin/")).toBe("~");
+		expect(shortenHome("/var/tmp/work", "/Users/jin")).toBe("/var/tmp/work");
+		expect(shortenHome("/Users/jin-dev/project", "/Users/jin")).toBe("/Users/jin-dev/project");
+		expect(shortenHome("/Users/jin/dev/project", undefined)).toBe("/Users/jin/dev/project");
+		expect(shortenHome("C:\\Users\\jin\\dev", "C:\\Users\\jin")).toBe("~/dev");
 	});
 });
 
@@ -390,11 +405,59 @@ describe("builtin Segment Registry", () => {
 		});
 		const config = createDefaultConfig();
 		config.preset = "custom";
-		config.segments.cwd.display = "path";
+		config.segments.cwd.display = "full";
 		const cwd = resolveSegments(snapshot, config, ["cwd"])[0];
 
 		expect(cwd?.text).toBe("Project: /Users/jin/dev/project");
 		expect(cwd?.compactText).toBe("project");
+	});
+
+	it("renders home-relative, absolute, and legacy project path displays", () => {
+		const cwd = "/Users/jin/dev/project";
+		const home = "/Users/jin";
+		const snapshot = snapshotWith({
+			session: { ...createEmptySnapshot().session, cwd, home },
+		});
+		const config = createDefaultConfig();
+		config.preset = "custom";
+
+		config.segments.cwd.display = "tilde";
+		expect(resolveSegments(snapshot, config, ["cwd"])[0]?.text).toBe("Project: ~/dev/project");
+
+		config.segments.cwd.display = "full";
+		expect(resolveSegments(snapshot, config, ["cwd"])[0]?.text).toBe(
+			"Project: /Users/jin/dev/project",
+		);
+
+		// The removed `path` value keeps rendering as home-relative.
+		config.segments.cwd.display = "path";
+		expect(resolveSegments(snapshot, config, ["cwd"])[0]?.text).toBe("Project: ~/dev/project");
+
+		config.segments.cwd.display = "name";
+		expect(resolveSegments(snapshot, config, ["cwd"])[0]?.text).toBe("Project: project");
+	});
+
+	it("falls back to the absolute path when tilde shortening is unavailable", () => {
+		const config = createDefaultConfig();
+		config.preset = "custom";
+		config.segments.cwd.display = "tilde";
+
+		const outside = snapshotWith({
+			session: { ...createEmptySnapshot().session, cwd: "/var/tmp/work", home: "/Users/jin" },
+		});
+		expect(resolveSegments(outside, config, ["cwd"])[0]?.text).toBe("Project: /var/tmp/work");
+
+		const noHome = snapshotWith({
+			session: { ...createEmptySnapshot().session, cwd: "/Users/jin/dev/project" },
+		});
+		expect(resolveSegments(noHome, config, ["cwd"])[0]?.text).toBe(
+			"Project: /Users/jin/dev/project",
+		);
+
+		const atHome = snapshotWith({
+			session: { ...createEmptySnapshot().session, cwd: "/Users/jin", home: "/Users/jin" },
+		});
+		expect(resolveSegments(atHome, config, ["cwd"])[0]?.text).toBe("Project: ~");
 	});
 
 	it("hides reset text when reset display is disabled", () => {

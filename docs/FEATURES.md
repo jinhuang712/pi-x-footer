@@ -6,7 +6,7 @@
 
 The built-in Segments can show:
 
-- Project path or folder name.
+- Project home-relative path, folder name, or full path.
 - Git branch and repository state, or a muted status when the project is not a Git repository.
 - Active provider, model, and thinking level.
 - Context usage and limit.

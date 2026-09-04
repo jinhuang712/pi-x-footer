@@ -47,6 +47,12 @@ const LEGACY_SEGMENT_FIELDS: Partial<Record<SegmentId, readonly string[]>> = {
 /** `minimal` was the old name for the compact built-in preset. */
 const LEGACY_PRESET_NAMES = { minimal: "compact" } as const;
 
+/** `path` was the old name for the home-relative project display. */
+const LEGACY_PROJECT_DISPLAY_STYLES: Record<string, string> = {
+	// Retained only as an input migration: old configs keep rendering `~/…`.
+	path: "tilde",
+};
+
 /** Usage display names from the previous, more granular settings model. */
 const LEGACY_USAGE_DISPLAY_STYLES: Record<string, UsageDisplayStyle> = {
 	// The old display names are retained only as input migrations.
@@ -406,6 +412,19 @@ function normalizeSegments(
 		if (displayStyles && valueForSegment.display !== undefined) {
 			if (isOneOf(valueForSegment.display, displayStyles)) {
 				target.display = valueForSegment.display;
+			} else if (id === "cwd" && typeof valueForSegment.display === "string") {
+				const migrated = LEGACY_PROJECT_DISPLAY_STYLES[valueForSegment.display];
+				if (migrated) {
+					target.display = migrated;
+					diagnostics.push(
+						migratedDiagnostic(
+							`${path}.display`,
+							`Project display ${JSON.stringify(valueForSegment.display)} was renamed; using ${JSON.stringify(migrated)}`,
+						),
+					);
+				} else {
+					diagnostics.push(invalidDiagnostic(`${path}.display`, "Unknown display preset"));
+				}
 			} else if (id === "provider_usage" && typeof valueForSegment.display === "string") {
 				const migrated = LEGACY_USAGE_DISPLAY_STYLES[valueForSegment.display];
 				if (migrated) {

@@ -37,9 +37,14 @@ The modes differ in Segment display detail rather than changing the meaning of t
 
 ## Segment detail
 
+Project display presets: `name` shows only the folder name (`pi-x-footer`),
+`tilde` shortens the home directory (`~/dev/pi/pi-x-footer`, the default),
+and `full` keeps the absolute path (`/Users/jin/dev/pi/pi-x-footer`).
+Paths outside the home directory always fall back to the absolute form.
+
 | Segment | Compact | Balanced | Detailed |
 |---|---|---|---|
-| Project | name | path | path |
+| Project | name | tilde | tilde |
 | Git | status | status | full |
 | Context | compact | hybrid | full |
 | Tokens | compact | standard | full |

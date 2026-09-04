@@ -24,6 +24,7 @@ import {
 	formatCount,
 	formatPercent,
 	sanitizeSegmentText,
+	shortenHome,
 } from "./format.js";
 import { SEGMENT_CONFIG_FIELDS } from "./metadata.js";
 import type {
@@ -90,16 +91,19 @@ export const BUILTIN_SEGMENTS: readonly FooterSegment[] = [
 		if (!snapshot.session.cwd) return undefined;
 		const style = display as ProjectDisplayStyle | undefined;
 		// The compact fallback must preserve the project name even when the
-		// configured display is the full path; otherwise responsive fitting
-		// cannot shrink a long path without dropping the whole Segment.
+		// configured display is a longer path form; otherwise responsive
+		// fitting cannot shrink a long path without dropping the whole Segment.
+		// `tilde` is the default: `~/dev/project` stays readable while full
+		// paths such as `/Users/jin/dev/project` waste a whole row. The
+		// removed `path` value keeps working as an alias of `tilde`.
 		const text =
 			format === "compact"
 				? compactPath(snapshot.session.cwd, false)
 				: style === "name"
 					? compactPath(snapshot.session.cwd, false)
-					: style === "path"
+					: style === "full"
 						? compactPath(snapshot.session.cwd, true)
-						: compactPath(snapshot.session.cwd, format === "detailed");
+						: shortenHome(snapshot.session.cwd, snapshot.session.home);
 		return displayContent(label ?? DEFAULT_LABELS.cwd, text, format, "muted");
 	}),
 	builtin("git", ({ snapshot, format, label, display }) =>
