@@ -32,11 +32,20 @@ export function fitRow(
 	if (effectiveStrategy === "compact-hide-truncate") compactSegments(all());
 	if (effectiveStrategy === "truncate") truncateOptional(all(), measure, width);
 
+	// Preserve the configured two-sided structure while hiding: removing the
+	// last Segment of an initially non-empty group would turn a left/right row
+	// into a single-group row. Prefer truncating both sides over dropping an
+	// entire side (e.g. a long project path must truncate, not vanish, when
+	// the model name is also long). Emptying a group remains allowed as the
+	// final fallback when even truncated content cannot fit.
+	const twoSided = left.length > 0 && right.length > 0;
 	while (measure() > width) {
 		const optional = all()
 			.filter((segment) => !segment.required)
 			.sort((leftSegment, rightSegment) => leftSegment.priority - rightSegment.priority);
-		const next = optional[0];
+		const next = optional.find(
+			(candidate) => !wouldEmptyGroup(candidate, fittedLeft, fittedRight, twoSided),
+		);
 		if (!next) break;
 		removeSegment(next, fittedLeft, fittedRight);
 		hidden.push(next.id);
@@ -46,6 +55,20 @@ export function fitRow(
 		compactSegments(all());
 	}
 	if (measure() > width) truncateOptional(all(), measure, width);
+	if (measure() > width) truncateRequired(all(), measure, width);
+
+	// Final fallback per spec: render required Segments only. Only here may
+	// hiding empty an initially non-empty group, when truncation alone cannot
+	// fit the terminal width.
+	while (measure() > width) {
+		const optional = all()
+			.filter((segment) => !segment.required)
+			.sort((leftSegment, rightSegment) => leftSegment.priority - rightSegment.priority);
+		const next = optional[0];
+		if (!next) break;
+		removeSegment(next, fittedLeft, fittedRight);
+		hidden.push(next.id);
+	}
 	if (measure() > width) truncateRequired(all(), measure, width);
 
 	return { left: fittedLeft, right: fittedRight, hidden };
@@ -106,6 +129,18 @@ function truncateByPriority(segments: LayoutSegment[], measure: () => number, wi
 		const targetWidth = Math.max(1, currentWidth - overflow);
 		if (targetWidth < currentWidth) truncateSegment(segment, targetWidth);
 	}
+}
+
+function wouldEmptyGroup(
+	segment: LayoutSegment,
+	left: readonly LayoutSegment[],
+	right: readonly LayoutSegment[],
+	twoSided: boolean,
+): boolean {
+	if (!twoSided) return false;
+	if (left.includes(segment)) return left.length === 1 && right.length > 0;
+	if (right.includes(segment)) return right.length === 1 && left.length > 0;
+	return false;
 }
 
 function removeSegment(

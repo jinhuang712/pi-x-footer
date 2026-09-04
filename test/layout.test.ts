@@ -356,4 +356,71 @@ describe("layoutFooter", () => {
 		expect(result.lines).toHaveLength(2);
 		expect(result.lines[1]?.trimStart()).toBe("ctx 20.0%/100k");
 	});
+
+	it("truncates a long project instead of dropping it when the model name is also long", () => {
+		const config = createDefaultConfig();
+		config.layout = {
+			rows: [
+				{
+					id: "project",
+					left: ["cwd"],
+					right: ["identity"],
+					visible: "always",
+					overflow: "hide",
+				},
+			],
+		};
+		const result = layoutFooter(
+			snapshotWith(),
+			config,
+			[
+				segment("cwd", "Project: /Users/jin.huang/dev/very-long-project-name", 85, {
+					compactText: "very-long-project-name",
+				}),
+				segment("identity", "opencode-zen: muse-spark-1.3-contributor-free (xhigh)", 100, {
+					compactText: "muse-spark-1.3-contributor-free (xhigh)",
+					required: true,
+				}),
+			],
+			80,
+		);
+
+		expect(result.rows).toHaveLength(1);
+		expect(result.rows[0]?.left).toHaveLength(1);
+		expect(result.rows[0]?.right).toHaveLength(1);
+		expect(result.hidden).toEqual([]);
+		expect(result.lines[0]).toContain("very-long-project-name");
+		expect(result.lines[0]).toContain("muse-spark-1.3-contributor-free");
+		expect(visibleWidth(result.lines[0] ?? "")).toBeLessThanOrEqual(80);
+	});
+
+	it("hides lower-priority segments before emptying a two-sided group", () => {
+		const config = createDefaultConfig();
+		config.layout = {
+			rows: [
+				{
+					id: "project",
+					left: ["cwd", "git"],
+					right: ["identity"],
+					visible: "always",
+					overflow: "hide",
+				},
+			],
+		};
+		const result = layoutFooter(
+			snapshotWith(),
+			config,
+			[
+				segment("cwd", "Project: my-project", 85, { compactText: "my-project" }),
+				segment("git", "Git: a-very-long-branch-name-for-testing", 70),
+				segment("identity", "provider: model (xhigh)", 100, { required: true }),
+			],
+			50,
+		);
+
+		expect(result.hidden).toEqual(["git"]);
+		expect(result.rows[0]?.left.map((item) => item.id)).toEqual(["cwd"]);
+		expect(result.rows[0]?.right.map((item) => item.id)).toEqual(["identity"]);
+		expect(visibleWidth(result.lines[0] ?? "")).toBeLessThanOrEqual(50);
+	});
 });

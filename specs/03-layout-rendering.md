@@ -40,7 +40,7 @@ For a row with both groups:
 left content                         right content
 ```
 
-The gap is calculated from the available width. If there is not enough room, right alignment MAY fall back to a single group layout after optional Segments are removed.
+The gap is calculated from the available width. Hiding MUST preserve the configured two-sided structure while truncation can still fit: the hide pass MUST NOT remove the last Segment of an initially non-empty group while the other group still has content (for example, a long project path MUST truncate rather than vanish when the model name is also long). Falling back to a single-group layout by emptying a group is allowed only as the final fallback, when even truncated content cannot fit the terminal width.
 
 A row whose left group resolves empty but whose right group has content remains a right-aligned row. Its content is not moved into another configured row: row boundaries and left/right placement remain faithful to the layout configuration. Rows with no resolved content are omitted, so unavailable conditional Segments do not create empty lines.
 
@@ -67,12 +67,12 @@ For each row:
 
 1. Try the full resolved row.
 2. Apply the configured responsive strategy. `hide-compact-truncate` hides optional values first, `compact-hide-truncate` tries each Segment's compact value first, and `truncate` tries safe truncation first.
-3. Remove optional Segments from lowest priority to highest priority when the current strategy still cannot fit.
-4. Replace values with the automatically resolved compact format where available.
+3. Remove optional Segments from lowest priority to highest priority when the current strategy still cannot fit, without emptying an initially non-empty left/right group while the other group still has content.
+4. Replace values with the automatically resolved compact format where available. The `cwd` compact value is the project basename even when the configured display is the full path, so fitting preserves the project name.
 5. Apply configured truncation to path/model/branch values.
 6. Render only the usage windows selected in the Usage settings; the Usage Segment may compact its selected values when space is limited.
 7. Truncate the least important remaining non-required Segment.
-8. As a final fallback, render required Segments only.
+8. As a final fallback, render required Segments only; only here may hiding empty an initially non-empty group to meet the terminal width.
 
 The registry precomputes `compactText` by resolving the same built-in Segment with the internal compact format. Renderers and layout code never perform I/O while creating this fallback. A row-level `compact` or `truncate` overflow policy takes precedence over the global strategy; the default row-level `hide` policy inherits the global strategy.
 
