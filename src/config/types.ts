@@ -90,8 +90,9 @@ export const GIT_DISPLAY_STYLES = ["branch", "status", "full"] as const;
 export const GIT_DISPLAY_UI_ORDER = ["branch", "status", "full"] as const;
 export type GitDisplayStyle = (typeof GIT_DISPLAY_STYLES)[number];
 
-/** Project presets: bare directory name or tilde-shortened path. */
-export const PROJECT_DISPLAY_STYLES = ["name", "path"] as const;
+/** Project presets: bare directory name, home-relative, or absolute path. */
+export const PROJECT_DISPLAY_STYLES = ["name", "tilde", "full"] as const;
+export const PROJECT_DISPLAY_UI_ORDER = ["name", "tilde", "full"] as const;
 export type ProjectDisplayStyle = (typeof PROJECT_DISPLAY_STYLES)[number];
 
 /** Cost display presets, ordered from least to most information. */

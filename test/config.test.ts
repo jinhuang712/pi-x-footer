@@ -32,7 +32,7 @@ describe("config defaults", () => {
 		]);
 		expect(config.layout.rows[0]?.left).toEqual(["cwd"]);
 		expect(config.layout.rows[0]?.right).toEqual(["identity"]);
-		expect(config.segments.cwd.display).toBe("path");
+		expect(config.segments.cwd.display).toBe("tilde");
 		expect(config.segments.git.display).toBe("full");
 		expect(config.segments.context.display).toBe("full");
 		expect(config.segments.tokens.display).toBe("standard");
@@ -146,6 +146,16 @@ describe("config normalization", () => {
 
 		const oneHour = normalizeConfig({ usage: { refreshSeconds: 3600 } });
 		expect(oneHour.config.usage.refreshSeconds).toBe(900);
+	});
+
+	it("migrates the legacy Project path display to home-relative tilde", () => {
+		const result = normalizeConfig({
+			preset: "custom",
+			layout: { rows: [{ id: "main", left: ["cwd"], right: [] }] },
+			segments: { cwd: { display: "path" } },
+		});
+		expect(result.config.segments.cwd.display).toBe("tilde");
+		expect(result.diagnostics[0]?.message).toContain("was renamed");
 	});
 
 	it("migrates legacy Usage display names to the simplified presets", () => {
@@ -301,7 +311,7 @@ describe("config normalization", () => {
 			"session",
 			"extensions",
 		]);
-		expect(balanced.config.segments.cwd.display).toBe("path");
+		expect(balanced.config.segments.cwd.display).toBe("tilde");
 		expect(balanced.config.segments.cache.display).toBe("read-write-hit");
 		expect(balanced.config.segments.context.display).toBe("hybrid");
 		expect(balanced.config.segments.tokens.display).toBe("standard");

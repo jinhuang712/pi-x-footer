@@ -32,3 +32,18 @@ export function compactPath(path: string, detailed: boolean): string {
 	const parts = normalized.split("/").filter(Boolean);
 	return parts.at(-1) ?? (normalized || ".");
 }
+
+/**
+ * Shorten a leading home directory to `~` (`/Users/jin/dev` → `~/dev`).
+ * Paths outside `home`, and a missing `home`, fall back to the normalized
+ * absolute path so display never depends on unavailable data.
+ */
+export function shortenHome(path: string, home: string | undefined): string {
+	const normalized = path.replaceAll("\\", "/") || ".";
+	if (!home) return normalized;
+	const base = home.replaceAll("\\", "/").replace(/\/+$/u, "");
+	if (!base || base === "/") return normalized;
+	if (normalized === base) return "~";
+	if (normalized.startsWith(`${base}/`)) return `~${normalized.slice(base.length)}`;
+	return normalized;
+}

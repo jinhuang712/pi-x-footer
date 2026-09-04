@@ -29,6 +29,13 @@ describe("session data", () => {
 		});
 	});
 
+	it("carries an explicit home directory for path shortening", () => {
+		expect(sessionSnapshotFromContext(baseContext({ home: "/Users/jin" }))).toMatchObject({
+			home: "/Users/jin",
+			cwd: "/workspace/project",
+		});
+	});
+
 	it("leaves optional model fields absent when no model is selected", () => {
 		expect(
 			sessionSnapshotFromContext(
@@ -66,6 +73,12 @@ describe("SessionDataSource", () => {
 			},
 			runtime: { mode: "tui", sessionGeneration: 1 },
 		});
+		// The data source records the process home once for `~` shortening.
+		// An explicit test context overrides it without touching the default.
+		expect(typeof store.getSnapshot().session.home).toBe("string");
+
+		source.sessionStart(baseContext({ home: "/Users/jin" }));
+		expect(store.getSnapshot().session.home).toBe("/Users/jin");
 
 		source.modelChanged(baseContext({ model: { provider: "anthropic", id: "claude-sonnet" } }));
 		expect(store.getSnapshot().session).toMatchObject({

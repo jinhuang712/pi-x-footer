@@ -184,7 +184,7 @@ enabled
 label
 ```
 
-Plus the Segment-specific display preset: Context `compact`, `hybrid`, or `full`; Cost `compact`, `standard`, or `full`. Cost also supports the independent `notation` values `arrows`, `short`, and `full`. Provider Usage window selection and reset visibility are configured under `usage`.
+Plus the Segment-specific display preset: Project `name`, `tilde`, or `full`; Context `compact`, `hybrid`, or `full`; Cost `compact`, `standard`, or `full`. The legacy Project value `path` migrates to `tilde` with a warning. Cost also supports the independent `notation` values `arrows`, `short`, and `full`. Provider Usage window selection and reset visibility are configured under `usage`.
 
 Per-Segment `format`, `priority`, `required`, `visibility`, `colorRole`, `emphasis`, and `minWidth` are intentionally NOT configurable:
 
