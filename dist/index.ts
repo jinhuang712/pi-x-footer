@@ -5102,6 +5102,7 @@ function usageErrorCode(error) {
 
 // src/usage/http.ts
 var CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
+var OPENCODE_GO_USAGE_URL = "https://opencode.ai/zen/go/v1/usage";
 var MAX_RESPONSE_BYTES = 64 * 1024;
 function isOfficialUsageOrigin(provider, baseUrl) {
   if (!baseUrl) return false;
@@ -5131,7 +5132,7 @@ function opencodeUsageUrl(baseUrl) {
       "OpenCode Go usage requires the official opencode.ai origin."
     );
   }
-  return `${baseUrl?.replace(/\/+$/u, "")}/usage`;
+  return OPENCODE_GO_USAGE_URL;
 }
 async function fetchUsageJson(url, auth, signal, timeoutMs, fetchImpl = defaultFetch) {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
@@ -5225,11 +5226,18 @@ function isRecord3(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+// src/usage/provider-id.ts
+function canonicalProviderId(id) {
+  if (!id) return "";
+  return id.trim().toLowerCase().replace(/\s+/g, "-");
+}
+
 // src/usage/auth.ts
 var FINGERPRINT_SALT = randomBytes(32);
 async function resolveRuntimeUsageAuth(ctx, provider, _signal) {
   const model = ctx.model;
-  if (!model || model.provider !== provider) return void 0;
+  if (!model || canonicalProviderId(model.provider) !== canonicalProviderId(provider))
+    return void 0;
   if (!isOfficialUsageOrigin(provider, model.baseUrl)) {
     throw new UsageError("unsupported", "Usage is disabled for custom or proxy provider origins.");
   }
@@ -5496,7 +5504,7 @@ function createArkPlanUsageAdapter(spec) {
     id: spec.id,
     displayName: spec.displayName,
     matches(input) {
-      return input.provider === spec.id && isOfficialUsageOrigin(spec.id, input.baseUrl);
+      return canonicalProviderId(input.provider) === spec.id && isOfficialUsageOrigin(spec.id, input.baseUrl);
     },
     async query(input) {
       if (!isOfficialUsageOrigin(spec.id, input.auth.baseUrl)) {
@@ -5608,7 +5616,7 @@ function createCodexUsageAdapter() {
     id: "openai-codex",
     displayName: "OpenAI Codex",
     matches(input) {
-      return input.provider === "openai-codex" && isOfficialUsageOrigin("openai-codex", input.baseUrl);
+      return canonicalProviderId(input.provider) === "openai-codex" && isOfficialUsageOrigin("openai-codex", input.baseUrl);
     },
     async query(input) {
       if (!isOfficialUsageOrigin("openai-codex", input.auth.baseUrl)) {
@@ -5632,7 +5640,7 @@ function createOpenCodeGoUsageAdapter() {
     id: "opencode-go",
     displayName: "OpenCode Go",
     matches(input) {
-      return input.provider === "opencode-go" && isOfficialUsageOrigin("opencode-go", input.baseUrl);
+      return canonicalProviderId(input.provider) === "opencode-go" && isOfficialUsageOrigin("opencode-go", input.baseUrl);
     },
     async query(input) {
       const url = opencodeUsageUrl(input.auth.baseUrl);
@@ -5661,7 +5669,7 @@ function createUsageManager(options) {
     createArkAgentPlanUsageAdapter(),
     createArkCodingPlanUsageAdapter()
   ];
-  const enabledProviders = new Set(options.providers);
+  const enabledProviders = new Set(options.providers.map(canonicalProviderId));
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const cacheTtlMs = options.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS;
   const debounceMs = options.debounceMs ?? DEFAULT_DEBOUNCE_MS;
@@ -5699,8 +5707,9 @@ function createUsageManager(options) {
     interval = setInterval(() => void refresh(), intervalMs);
   };
   const selectAdapter = (current) => {
-    if (!current.provider || !enabledProviders.has(current.provider)) return void 0;
-    return adapters.find((adapter) => adapter.id === current.provider && adapter.matches(current));
+    const provider = canonicalProviderId(current.provider);
+    if (!provider || !enabledProviders.has(provider)) return void 0;
+    return adapters.find((adapter) => adapter.id === provider && adapter.matches(current));
   };
   const isCurrent = (currentGeneration, currentRequestId) => generation === currentGeneration && requestId === currentRequestId && context !== void 0;
   const publishUnavailable = (provider, errorCode) => {
