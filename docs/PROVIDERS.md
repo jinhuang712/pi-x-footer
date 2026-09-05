@@ -26,7 +26,7 @@ Agent Plan and Coding Plan quotas are read with the corresponding Ark CLI plan c
 
 ## Matching and failure behavior
 
-- Only official provider identities and origins are accepted.
+- Only official provider identities and origins are accepted. Provider identities are compared in canonical form, so pi's display-name identities (e.g. `OpenCode Go`) match the canonical adapter ids (e.g. `opencode-go`).
 - Custom and proxy origins are not queried.
 - Missing subscriptions, unsupported providers, authentication failures, and network failures degrade to hidden, unavailable, or stale states.
 - Cached data can remain visible as stale with a warning state.

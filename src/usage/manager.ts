@@ -1,6 +1,7 @@
 import type { UsageCacheEntry } from "./cache.js";
 import { UsageCache, usageCacheKey } from "./cache.js";
 import { usageErrorCode } from "./errors.js";
+import { canonicalProviderId } from "./provider-id.js";
 import { createArkAgentPlanUsageAdapter } from "./providers/ark-agent-plan.js";
 import { createArkCodingPlanUsageAdapter } from "./providers/ark-coding-plan.js";
 import { createCodexUsageAdapter } from "./providers/codex.js";
@@ -25,7 +26,7 @@ export function createUsageManager(options: UsageManagerOptions): UsageManager {
 		createArkAgentPlanUsageAdapter(),
 		createArkCodingPlanUsageAdapter(),
 	];
-	const enabledProviders = new Set<string>(options.providers);
+	const enabledProviders = new Set<string>(options.providers.map(canonicalProviderId));
 	const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 	const cacheTtlMs = options.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS;
 	const debounceMs = options.debounceMs ?? DEFAULT_DEBOUNCE_MS;
@@ -68,8 +69,9 @@ export function createUsageManager(options: UsageManagerOptions): UsageManager {
 	};
 
 	const selectAdapter = (current: UsageSessionContext): UsageProviderAdapter | undefined => {
-		if (!current.provider || !enabledProviders.has(current.provider)) return undefined;
-		return adapters.find((adapter) => adapter.id === current.provider && adapter.matches(current));
+		const provider = canonicalProviderId(current.provider);
+		if (!provider || !enabledProviders.has(provider)) return undefined;
+		return adapters.find((adapter) => adapter.id === provider && adapter.matches(current));
 	};
 
 	const isCurrent = (currentGeneration: number, currentRequestId: number): boolean =>

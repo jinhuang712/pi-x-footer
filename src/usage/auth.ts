@@ -2,6 +2,7 @@ import { createHmac, randomBytes } from "node:crypto";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { UsageError } from "./errors.js";
 import { isOfficialUsageOrigin } from "./http.js";
+import { canonicalProviderId } from "./provider-id.js";
 import type { UsageAuth } from "./types.js";
 
 const FINGERPRINT_SALT = randomBytes(32);
@@ -12,7 +13,8 @@ export async function resolveRuntimeUsageAuth(
 	_signal: AbortSignal,
 ): Promise<UsageAuth | undefined> {
 	const model = ctx.model;
-	if (!model || model.provider !== provider) return undefined;
+	if (!model || canonicalProviderId(model.provider) !== canonicalProviderId(provider))
+		return undefined;
 	if (!isOfficialUsageOrigin(provider, model.baseUrl)) {
 		throw new UsageError("unsupported", "Usage is disabled for custom or proxy provider origins.");
 	}

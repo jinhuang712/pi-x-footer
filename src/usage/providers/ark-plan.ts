@@ -1,6 +1,7 @@
 import type { ProviderUsageSnapshot } from "../../state/types.js";
 import { UsageError } from "../errors.js";
 import { isOfficialUsageOrigin } from "../http.js";
+import { canonicalProviderId } from "../provider-id.js";
 import type { UsageExecResult, UsageProviderAdapter } from "../types.js";
 
 /**
@@ -20,7 +21,10 @@ export function createArkPlanUsageAdapter(spec: ArkPlanAdapterSpec): UsageProvid
 		id: spec.id,
 		displayName: spec.displayName,
 		matches(input) {
-			return input.provider === spec.id && isOfficialUsageOrigin(spec.id, input.baseUrl);
+			return (
+				canonicalProviderId(input.provider) === spec.id &&
+				isOfficialUsageOrigin(spec.id, input.baseUrl)
+			);
 		},
 		async query(input) {
 			if (!isOfficialUsageOrigin(spec.id, input.auth.baseUrl)) {

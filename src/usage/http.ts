@@ -2,6 +2,7 @@ import { UsageError } from "./errors.js";
 import type { UsageAuth, UsageFetch } from "./types.js";
 
 export const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
+export const OPENCODE_GO_USAGE_URL = "https://opencode.ai/zen/go/v1/usage";
 const MAX_RESPONSE_BYTES = 64 * 1024;
 
 export function isOfficialUsageOrigin(provider: string, baseUrl: string | undefined): boolean {
@@ -36,7 +37,10 @@ export function opencodeUsageUrl(baseUrl: string | undefined): string {
 			"OpenCode Go usage requires the official opencode.ai origin.",
 		);
 	}
-	return `${baseUrl?.replace(/\/+$/u, "")}/usage`;
+	// The GO plan serves quota from the versioned `/zen/go/v1` path even when
+	// the model endpoint carries `/zen/go` or the bare origin; the other paths
+	// return 404.
+	return OPENCODE_GO_USAGE_URL;
 }
 
 export async function fetchUsageJson(

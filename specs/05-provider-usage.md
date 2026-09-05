@@ -95,6 +95,8 @@ Example normalized output:
 
 The adapter MUST only send credentials to the validated official OpenCode origin and MUST reject unsupported custom/proxy origins unless a future explicit policy permits them.
 
+The adapter MUST match the provider id under both canonical and catalog forms: pi reports the OpenCode Go model family with the display-name provider id `OpenCode Go`, while adapter ids and configuration use the canonical dash-form `opencode-go`; both must select the same adapter. Quota is served from the versioned `https://opencode.ai/zen/go/v1/usage` endpoint even when the model base URL carries `/zen/go` or the bare origin, so the adapter MUST pin the usage URL to that endpoint after origin validation.
+
 ## 6. Volcano Engine Plans
 
 Both Ark subscription plans share the same control-plane quota source and `arkcli` CLI transport; they differ only in the endpoint origin, the `--product` argument, and the short-window label.
