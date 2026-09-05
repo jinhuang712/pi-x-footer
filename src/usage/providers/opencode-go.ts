@@ -1,5 +1,6 @@
 import { fetchUsageJson, isOfficialUsageOrigin, opencodeUsageUrl } from "../http.js";
 import { normalizeOpenCodeUsage } from "../normalize.js";
+import { canonicalProviderId } from "../provider-id.js";
 import type { UsageProviderAdapter } from "../types.js";
 
 export function createOpenCodeGoUsageAdapter(): UsageProviderAdapter {
@@ -8,7 +9,8 @@ export function createOpenCodeGoUsageAdapter(): UsageProviderAdapter {
 		displayName: "OpenCode Go",
 		matches(input) {
 			return (
-				input.provider === "opencode-go" && isOfficialUsageOrigin("opencode-go", input.baseUrl)
+				canonicalProviderId(input.provider) === "opencode-go" &&
+				isOfficialUsageOrigin("opencode-go", input.baseUrl)
 			);
 		},
 		async query(input) {

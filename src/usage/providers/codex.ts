@@ -1,5 +1,6 @@
 import { CODEX_USAGE_URL, fetchUsageJson, isOfficialUsageOrigin } from "../http.js";
 import { normalizeCodexUsage } from "../normalize.js";
+import { canonicalProviderId } from "../provider-id.js";
 import type { UsageProviderAdapter } from "../types.js";
 
 export function createCodexUsageAdapter(): UsageProviderAdapter {
@@ -8,7 +9,8 @@ export function createCodexUsageAdapter(): UsageProviderAdapter {
 		displayName: "OpenAI Codex",
 		matches(input) {
 			return (
-				input.provider === "openai-codex" && isOfficialUsageOrigin("openai-codex", input.baseUrl)
+				canonicalProviderId(input.provider) === "openai-codex" &&
+				isOfficialUsageOrigin("openai-codex", input.baseUrl)
 			);
 		},
 		async query(input) {

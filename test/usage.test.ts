@@ -5,7 +5,7 @@ import type { ProviderUsageSnapshot } from "../src/state/types.js";
 import { resolveRuntimeUsageAuth } from "../src/usage/auth.js";
 import { UsageCache } from "../src/usage/cache.js";
 import { UsageError } from "../src/usage/errors.js";
-import { fetchUsageJson, isOfficialUsageOrigin } from "../src/usage/http.js";
+import { fetchUsageJson, isOfficialUsageOrigin, opencodeUsageUrl } from "../src/usage/http.js";
 import { createUsageManager } from "../src/usage/manager.js";
 import {
 	normalizeArkAgentPlanUsage,
@@ -209,6 +209,33 @@ describe("usage adapters and origin policy", () => {
 		expect(
 			isOfficialUsageOrigin("volcengine-coding-plan", "https://ark.cn-beijing.volces.com/api/v3"),
 		).toBe(false);
+	});
+
+	it("pins the OpenCode Go usage URL to the official versioned endpoint", () => {
+		for (const baseUrl of [
+			"https://opencode.ai/zen/go/v1",
+			"https://opencode.ai/zen/go",
+			"https://opencode.ai/",
+		]) {
+			expect(opencodeUsageUrl(baseUrl)).toBe("https://opencode.ai/zen/go/v1/usage");
+		}
+		expect(() => opencodeUsageUrl("https://proxy.example.com/zen/go/v1")).toThrow(UsageError);
+	});
+
+	it("matches OpenCode Go under pi's catalog display-name provider identity", () => {
+		const adapter = createOpenCodeGoUsageAdapter();
+		expect(
+			adapter.matches({ provider: "OpenCode Go", baseUrl: "https://opencode.ai/zen/go/v1" }),
+		).toBe(true);
+		expect(
+			adapter.matches({ provider: "opencode-go", baseUrl: "https://opencode.ai/zen/go" }),
+		).toBe(true);
+		expect(adapter.matches({ provider: "OpenCode Go", baseUrl: "https://proxy.example.com" })).toBe(
+			false,
+		);
+		expect(adapter.matches({ provider: "OpenCode Zen", baseUrl: "https://opencode.ai" })).toBe(
+			false,
+		);
 	});
 
 	it("queries Codex and OpenCode through injected HTTP clients", async () => {
@@ -419,6 +446,36 @@ describe("usage adapters and origin policy", () => {
 });
 
 describe("usage cache and manager", () => {
+	it("selects OpenCode Go when the session reports pi's catalog display-name provider", async () => {
+		const store = createFooterStore();
+		const fetchMock = vi.fn(
+			async () => new Response(JSON.stringify(fixture("opencode-go.json")), { status: 200 }),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+		const manager = createUsageManager({
+			store,
+			providers: ["opencode-go"],
+			refreshSeconds: 3600,
+		});
+		manager.sessionStart({
+			provider: "OpenCode Go",
+			model: "grok-4.6",
+			baseUrl: "https://opencode.ai/zen/go/v1",
+			resolveAuth: async () => ({ ...auth, baseUrl: "https://opencode.ai/zen/go/v1" }),
+		});
+		await manager.refresh();
+		expect(store.getSnapshot().providerUsage).toMatchObject({
+			provider: "opencode-go",
+			state: "fresh",
+		});
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://opencode.ai/zen/go/v1/usage",
+			expect.anything(),
+		);
+		manager.sessionShutdown();
+		vi.unstubAllGlobals();
+	});
+
 	it("keeps bounded, non-secret cache entries", () => {
 		const cache = new UsageCache(1);
 		cache.set({
@@ -618,6 +675,30 @@ describe("runtime usage auth", () => {
 		);
 		expect(resolved).toMatchObject({ baseUrl: "https://chatgpt.com/backend-api" });
 		expect(resolved?.fingerprint).not.toContain("test-token");
+	});
+
+	it("resolves OpenCode Go auth when the model reports pi's catalog display-name provider", async () => {
+		const ctx = {
+			model: {
+				provider: "OpenCode Go",
+				id: "grok-4.6",
+				baseUrl: "https://opencode.ai/zen/go/v1",
+			},
+			modelRegistry: {
+				getApiKeyAndHeaders: async () => ({
+					ok: true,
+					headers: { Authorization: "Bearer oc-test" },
+					baseUrl: "https://opencode.ai/zen/go/v1",
+				}),
+			},
+		} as never;
+		const resolved = await resolveRuntimeUsageAuth(
+			ctx,
+			"opencode-go",
+			new AbortController().signal,
+		);
+		expect(resolved).toMatchObject({ baseUrl: "https://opencode.ai/zen/go/v1" });
+		expect(resolved?.fingerprint).not.toContain("oc-test");
 	});
 
 	it("fails closed for custom origins before resolving credentials", async () => {
