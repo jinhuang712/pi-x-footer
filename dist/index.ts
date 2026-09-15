@@ -1745,7 +1745,7 @@ var SelectList = class {
     return item || null;
   }
 };
-var WIZARD_EXIT = "\0pi-x-footer:exit\0";
+var WIZARD_EXIT = "\0pid-footer:exit\0";
 function settingsSelectItems(options) {
   const parsed = options.map((value) => {
     const separators = [value.indexOf(" - "), value.indexOf(" \u2014 ")].filter((index) => index >= 0);
@@ -3777,7 +3777,7 @@ function segmentRow(segmentId) {
   if (segmentId === "cost") return "usage";
   return "project";
 }
-function parseXFooterCommand(args) {
+function parseFooterCommand(args) {
   const argument = args.trim();
   if (!argument) return { kind: "wizard" };
   if (argument === "toggle") return { kind: "toggle" };
@@ -3790,17 +3790,17 @@ function parseXFooterCommand(args) {
   if (argument === "minimal") return { kind: "preset", preset: "compact" };
   return { kind: "invalid", argument };
 }
-var XFOOTER_HELP = [
-  "/xfooter - open the interactive configuration menu",
+var FOOTER_HELP = [
+  "/footer - open the interactive configuration menu",
   "  Type to search, Enter confirms and saves, Esc goes back one level",
-  "/xfooter toggle - enable or disable the Footer",
-  "/xfooter compact|balanced|detailed - apply a built-in preset (minimal is a legacy alias)",
-  "/xfooter refresh - refresh Git and provider usage",
-  "/xfooter status - show non-secret status"
+  "/footer toggle - enable or disable the Footer",
+  "/footer compact|balanced|detailed - apply a built-in preset (minimal is a legacy alias)",
+  "/footer refresh - refresh Git and provider usage",
+  "/footer status - show non-secret status"
 ].join("\n");
 
 // src/config/loader.ts
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 
@@ -4380,12 +4380,19 @@ function invalidDiagnostic(path, message) {
 }
 
 // src/config/loader.ts
-var CONFIG_FILE_NAME = "pi-x-footer.json";
+var CONFIG_FILE_NAME = "pid-footer.json";
+var LEGACY_CONFIG_FILE_NAME = "pi-x-footer.json";
+function existing(dir) {
+  const current = join(dir, CONFIG_FILE_NAME);
+  if (existsSync(current)) return current;
+  const legacy = join(dir, LEGACY_CONFIG_FILE_NAME);
+  return existsSync(legacy) ? legacy : current;
+}
 function configFilePath(agentDir = getAgentDir()) {
-  return join(agentDir, CONFIG_FILE_NAME);
+  return existing(agentDir);
 }
 function projectConfigFilePath(projectRoot) {
-  return join(projectRoot, ".pi", CONFIG_FILE_NAME);
+  return existing(join(projectRoot, ".pi"));
 }
 function loadConfig(options = {}) {
   const globalPath = configFilePath(options.agentDir);
@@ -5913,7 +5920,7 @@ function createUsageManager(options) {
 }
 
 // src/extension.ts
-function piXFooter(pi) {
+function pidFooter(pi) {
   const store = createFooterStore();
   const sessionData = createSessionDataSource(store);
   const conversationData = createConversationDataSource(store);
@@ -5974,23 +5981,23 @@ function piXFooter(pi) {
       applyRuntimeConfig(ctx, config);
       ctx.ui.notify(message, "info");
     } catch {
-      ctx.ui.notify("\u65E0\u6CD5\u4FDD\u5B58 pi-x-footer \u914D\u7F6E\uFF0C\u539F\u914D\u7F6E\u672A\u6539\u53D8\u3002", "error");
+      ctx.ui.notify("\u65E0\u6CD5\u4FDD\u5B58 pid-footer \u914D\u7F6E\uFF0C\u539F\u914D\u7F6E\u672A\u6539\u53D8\u3002", "error");
     }
   };
-  pi.registerCommand("xfooter", {
-    description: "Configure the pi-x-footer Footer",
+  pi.registerCommand("footer", {
+    description: "Configure the pid-footer Footer",
     handler: async (args, ctx) => {
-      const action = parseXFooterCommand(args);
+      const action = parseFooterCommand(args);
       const loaded = loadConfig({ projectRoot: ctx.cwd });
       const current = activeConfig ?? loaded.config;
       if (action.kind === "invalid") {
-        ctx.ui.notify(`\u672A\u77E5 /xfooter \u53C2\u6570\uFF1A${action.argument}
+        ctx.ui.notify(`\u672A\u77E5 /footer \u53C2\u6570\uFF1A${action.argument}
 
-${XFOOTER_HELP}`, "error");
+${FOOTER_HELP}`, "error");
         return;
       }
       if (action.kind === "help") {
-        ctx.ui.notify(XFOOTER_HELP, "info");
+        ctx.ui.notify(FOOTER_HELP, "info");
         return;
       }
       if (action.kind === "status") {
@@ -6049,13 +6056,13 @@ ${XFOOTER_HELP}`, "error");
         };
         const next2 = await runFooterWizard(current, wizardUI, save);
         applyRuntimeConfig(ctx, next2);
-        ctx.ui.notify("pi-x-footer \u914D\u7F6E\u5DF2\u66F4\u65B0\u3002", "info");
+        ctx.ui.notify("pid-footer \u914D\u7F6E\u5DF2\u66F4\u65B0\u3002", "info");
         return;
       }
       const next = cloneConfig(current);
       if (action.kind === "toggle") next.enabled = !next.enabled;
       if (action.kind === "preset") applyBuiltInPreset(next, action.preset);
-      await saveAndApply(ctx, next, "pi-x-footer \u914D\u7F6E\u5DF2\u66F4\u65B0\u3002");
+      await saveAndApply(ctx, next, "pid-footer \u914D\u7F6E\u5DF2\u66F4\u65B0\u3002");
     }
   });
   pi.on("session_start", (_event, ctx) => {
@@ -6114,6 +6121,6 @@ function createUsageContext(ctx) {
   };
 }
 export {
-  piXFooter as default
+  pidFooter as default
 };
 //# sourceMappingURL=index.ts.map

@@ -233,7 +233,7 @@ export interface SettingsTheme {
 }
 
 /** Legacy sentinel retained for compatibility with non-TUI wizard hosts. */
-export const WIZARD_EXIT = "\u0000pi-x-footer:exit\u0000";
+export const WIZARD_EXIT = "\u0000pid-footer:exit\u0000";
 
 export interface SettingsSelectResult {
 	value: string;

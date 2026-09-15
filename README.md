@@ -22,7 +22,7 @@ For reload, local development, and removal, see [INSTALL](./docs/INSTALL.md).
 - Cost display presets for total-only, cached/uncached groups, or the full input/output/cache read/cache write breakdown.
 - Independent Cost notation with arrows, short labels, or full labels.
 - Semantic colors with monochrome fallback.
-- Interactive `/xfooter` settings with searchable `General`, `Components`, `Layout`, and `Appearance` tabs.
+- Interactive `/footer` settings with searchable `General`, `Components`, `Layout`, and `Appearance` tabs.
 - Built-in `compact`, `balanced`, `detailed`, and `custom` modes.
 - Optional account-level Provider Usage monitoring.
 - Footer-only integration through Pi's public Footer API.
@@ -63,11 +63,11 @@ See [PROVIDERS](./docs/PROVIDERS.md) for matching rules, quota windows, and priv
 
 ## Quick start
 
-- `/xfooter` — open settings.
-- `/xfooter compact|balanced|detailed` — apply a built-in mode.
-- `/xfooter toggle` — enable or disable the Footer.
-- `/xfooter refresh` — refresh Provider Usage.
-- `/xfooter status` — show non-secret status information.
+- `/footer` — open settings.
+- `/footer compact|balanced|detailed` — apply a built-in mode.
+- `/footer toggle` — enable or disable the Footer.
+- `/footer refresh` — refresh Provider Usage.
+- `/footer status` — show non-secret status information.
 
 See [PRESETS](./docs/PRESETS.md) for display modes, Cost breakdowns, and independent Usage settings.
 

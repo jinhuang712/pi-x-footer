@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { cloneConfig } from "./defaults.js";
@@ -6,7 +6,17 @@ import { cleanLayoutRows } from "./layout.js";
 import { normalizeConfig } from "./schema.js";
 import type { ConfigDiagnostic, ConfigSource, FooterConfig, LoadedConfig } from "./types.js";
 
-export const CONFIG_FILE_NAME = "pi-x-footer.json";
+export const CONFIG_FILE_NAME = "pid-footer.json";
+/** The name this extension used before it was renamed; read when the current one is absent. */
+export const LEGACY_CONFIG_FILE_NAME = "pi-x-footer.json";
+
+/** The current path, or the legacy one while only that exists. Writes always use the current name. */
+function existing(dir: string): string {
+	const current = join(dir, CONFIG_FILE_NAME);
+	if (existsSync(current)) return current;
+	const legacy = join(dir, LEGACY_CONFIG_FILE_NAME);
+	return existsSync(legacy) ? legacy : current;
+}
 
 export interface LoadConfigOptions {
 	agentDir?: string;
@@ -14,11 +24,11 @@ export interface LoadConfigOptions {
 }
 
 export function configFilePath(agentDir = getAgentDir()): string {
-	return join(agentDir, CONFIG_FILE_NAME);
+	return existing(agentDir);
 }
 
 export function projectConfigFilePath(projectRoot: string): string {
-	return join(projectRoot, ".pi", CONFIG_FILE_NAME);
+	return existing(join(projectRoot, ".pi"));
 }
 
 export function loadConfig(options: LoadConfigOptions = {}): LoadedConfig {

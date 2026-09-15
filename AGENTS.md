@@ -47,7 +47,7 @@ specs/09-implementation-plan.md
 - 只实现一个纯函数布局算法。
 - 只实现 Context Segment。
 - 只实现 Codex 响应标准化。
-- 只实现一个 `/xfooter` 子命令。
+- 只实现一个 `/footer` 子命令。
 
 不要在同一个改动中同时重构架构、增加功能、修改样式和整理无关代码。
 

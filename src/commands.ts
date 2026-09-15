@@ -1810,7 +1810,7 @@ function segmentRow(segmentId: SegmentId): string {
 // Commands
 // ---------------------------------------------------------------------------
 
-export type XFooterCommandAction =
+export type FooterCommandAction =
 	| { kind: "wizard" }
 	| { kind: "toggle" }
 	| { kind: "preset"; preset: Exclude<PresetName, "custom"> }
@@ -1819,7 +1819,7 @@ export type XFooterCommandAction =
 	| { kind: "help" }
 	| { kind: "invalid"; argument: string };
 
-export function parseXFooterCommand(args: string): XFooterCommandAction {
+export function parseFooterCommand(args: string): FooterCommandAction {
 	const argument = args.trim();
 	if (!argument) return { kind: "wizard" };
 	if (argument === "toggle") return { kind: "toggle" };
@@ -1833,11 +1833,11 @@ export function parseXFooterCommand(args: string): XFooterCommandAction {
 	return { kind: "invalid", argument };
 }
 
-export const XFOOTER_HELP = [
-	"/xfooter - open the interactive configuration menu",
+export const FOOTER_HELP = [
+	"/footer - open the interactive configuration menu",
 	"  Type to search, Enter confirms and saves, Esc goes back one level",
-	"/xfooter toggle - enable or disable the Footer",
-	"/xfooter compact|balanced|detailed - apply a built-in preset (minimal is a legacy alias)",
-	"/xfooter refresh - refresh Git and provider usage",
-	"/xfooter status - show non-secret status",
+	"/footer toggle - enable or disable the Footer",
+	"/footer compact|balanced|detailed - apply a built-in preset (minimal is a legacy alias)",
+	"/footer refresh - refresh Git and provider usage",
+	"/footer status - show non-secret status",
 ].join("\n");

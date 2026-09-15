@@ -5,10 +5,10 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import {
 	applyBuiltInPreset,
-	parseXFooterCommand,
+	FOOTER_HELP,
+	parseFooterCommand,
 	runFooterWizard,
 	type WizardSaveResult,
-	XFOOTER_HELP,
 } from "./commands.js";
 import { cloneConfig } from "./config/defaults.js";
 import { loadConfig } from "./config/index.js";
@@ -30,7 +30,7 @@ import { resolveRuntimeUsageAuth } from "./usage/auth.js";
 import { createUsageManager } from "./usage/manager.js";
 import type { UsageManager, UsageSessionContext } from "./usage/types.js";
 
-export default function piXFooter(pi: ExtensionAPI): void {
+export default function pidFooter(pi: ExtensionAPI): void {
 	const store = createFooterStore();
 	const sessionData = createSessionDataSource(store);
 	const conversationData = createConversationDataSource(store);
@@ -107,23 +107,23 @@ export default function piXFooter(pi: ExtensionAPI): void {
 			applyRuntimeConfig(ctx, config);
 			ctx.ui.notify(message, "info");
 		} catch {
-			ctx.ui.notify("无法保存 pi-x-footer 配置，原配置未改变。", "error");
+			ctx.ui.notify("无法保存 pid-footer 配置，原配置未改变。", "error");
 		}
 	};
 
-	pi.registerCommand("xfooter", {
-		description: "Configure the pi-x-footer Footer",
+	pi.registerCommand("footer", {
+		description: "Configure the pid-footer Footer",
 		handler: async (args, ctx) => {
-			const action = parseXFooterCommand(args);
+			const action = parseFooterCommand(args);
 			const loaded = loadConfig({ projectRoot: ctx.cwd });
 			const current = activeConfig ?? loaded.config;
 
 			if (action.kind === "invalid") {
-				ctx.ui.notify(`未知 /xfooter 参数：${action.argument}\n\n${XFOOTER_HELP}`, "error");
+				ctx.ui.notify(`未知 /footer 参数：${action.argument}\n\n${FOOTER_HELP}`, "error");
 				return;
 			}
 			if (action.kind === "help") {
-				ctx.ui.notify(XFOOTER_HELP, "info");
+				ctx.ui.notify(FOOTER_HELP, "info");
 				return;
 			}
 			if (action.kind === "status") {
@@ -196,14 +196,14 @@ export default function piXFooter(pi: ExtensionAPI): void {
 				};
 				const next = await runFooterWizard(current, wizardUI, save);
 				applyRuntimeConfig(ctx, next);
-				ctx.ui.notify("pi-x-footer 配置已更新。", "info");
+				ctx.ui.notify("pid-footer 配置已更新。", "info");
 				return;
 			}
 
 			const next = cloneConfig(current);
 			if (action.kind === "toggle") next.enabled = !next.enabled;
 			if (action.kind === "preset") applyBuiltInPreset(next, action.preset);
-			await saveAndApply(ctx, next, "pi-x-footer 配置已更新。");
+			await saveAndApply(ctx, next, "pid-footer 配置已更新。");
 		},
 	});
 

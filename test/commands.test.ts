@@ -3,7 +3,7 @@ import {
 	applyBuiltInPreset,
 	applyCustomPreset,
 	footerPreviewLines,
-	parseXFooterCommand,
+	parseFooterCommand,
 	runFooterWizard,
 	type WizardSaveCallback,
 	type WizardSaveResult,
@@ -70,16 +70,16 @@ function customConfig(): FooterConfig {
 	return config;
 }
 
-describe("xfooter command parsing", () => {
+describe("footer command parsing", () => {
 	it("opens the wizard for an empty command and recognizes every subcommand", () => {
-		expect(parseXFooterCommand(" ")).toEqual({ kind: "wizard" });
-		expect(parseXFooterCommand("toggle")).toEqual({ kind: "toggle" });
-		expect(parseXFooterCommand("compact")).toEqual({ kind: "preset", preset: "compact" });
-		expect(parseXFooterCommand("minimal")).toEqual({ kind: "preset", preset: "compact" });
-		expect(parseXFooterCommand("refresh")).toEqual({ kind: "refresh" });
-		expect(parseXFooterCommand("status")).toEqual({ kind: "status" });
-		expect(parseXFooterCommand("help")).toEqual({ kind: "help" });
-		expect(parseXFooterCommand("unknown")).toEqual({ kind: "invalid", argument: "unknown" });
+		expect(parseFooterCommand(" ")).toEqual({ kind: "wizard" });
+		expect(parseFooterCommand("toggle")).toEqual({ kind: "toggle" });
+		expect(parseFooterCommand("compact")).toEqual({ kind: "preset", preset: "compact" });
+		expect(parseFooterCommand("minimal")).toEqual({ kind: "preset", preset: "compact" });
+		expect(parseFooterCommand("refresh")).toEqual({ kind: "refresh" });
+		expect(parseFooterCommand("status")).toEqual({ kind: "status" });
+		expect(parseFooterCommand("help")).toEqual({ kind: "help" });
+		expect(parseFooterCommand("unknown")).toEqual({ kind: "invalid", argument: "unknown" });
 	});
 });
 
