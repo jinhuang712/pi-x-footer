@@ -3,7 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createDefaultConfig } from "../src/config/defaults.js";
-import { configFilePath, loadConfig, projectConfigFilePath, serializeConfig } from "../src/config/loader.js";
+import {
+	configFilePath,
+	loadConfig,
+	projectConfigFilePath,
+	serializeConfig,
+} from "../src/config/loader.js";
 import { saveConfig, saveConfigDocument } from "../src/config/persistence.js";
 import { normalizeConfig } from "../src/config/schema.js";
 
