@@ -65,7 +65,7 @@ export async function fetchUsageJson(
 	try {
 		const response = await fetchImpl(url, {
 			method: "GET",
-			headers: { ...auth.headers, "User-Agent": "pi-x-footer" },
+			headers: { ...auth.headers, "User-Agent": "pid-footer" },
 			signal: controller.signal,
 		});
 		if (controller.signal.aborted) {
