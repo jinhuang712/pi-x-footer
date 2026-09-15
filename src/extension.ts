@@ -17,6 +17,7 @@ import type { FooterConfig } from "./config/types.js";
 import { createConversationDataSource } from "./data/conversation.js";
 import { createRepositoryDataSource } from "./data/repository.js";
 import { createSessionDataSource } from "./data/session.js";
+import { createWidgetPublisher } from "./host/widget.js";
 import { FooterComponent } from "./render/index.js";
 import {
 	editLayoutSettings,
@@ -36,6 +37,7 @@ export default function piXFooter(pi: ExtensionAPI): void {
 	const repositoryData = createRepositoryDataSource(store, {
 		exec: (command, args, options) => pi.exec(command, args, options),
 	});
+	const widget = createWidgetPublisher(store);
 	let usageManager: UsageManager | undefined;
 	let activeConfig: FooterConfig | undefined;
 	let repositoryActive = false;
@@ -45,20 +47,28 @@ export default function piXFooter(pi: ExtensionAPI): void {
 		usageManager = undefined;
 	};
 
-	const installFooter = (ctx: ExtensionContext, config: FooterConfig) => {
-		if (ctx.mode !== "tui" || !config.enabled) {
-			if (ctx.mode === "tui") ctx.ui.setFooter(undefined);
+	/**
+	 * Install this host's presentation. A terminal gets the Footer; a host that draws but is not a
+	 * terminal gets the same snapshot as a widget, because `setFooter` hands back a pi-tui component
+	 * only a terminal can mount.
+	 */
+	const installPresentation = (ctx: ExtensionContext, config: FooterConfig) => {
+		if (ctx.mode === "tui") {
+			ctx.ui.setFooter(
+				config.enabled
+					? (tui, theme) =>
+							new FooterComponent({
+								store,
+								config,
+								theme,
+								tui,
+							})
+					: undefined,
+			);
 			return;
 		}
-		ctx.ui.setFooter(
-			(tui, theme) =>
-				new FooterComponent({
-					store,
-					config,
-					theme,
-					tui,
-				}),
-		);
+		if (config.enabled) widget.start(ctx);
+		else widget.stop(ctx);
 	};
 
 	const applyRuntimeConfig = (ctx: ExtensionContext, config: FooterConfig) => {
@@ -69,7 +79,7 @@ export default function piXFooter(pi: ExtensionAPI): void {
 				repositoryData.sessionShutdown();
 				repositoryActive = false;
 			}
-			installFooter(ctx, config);
+			installPresentation(ctx, config);
 			return;
 		}
 		if (!repositoryActive) {
@@ -83,7 +93,7 @@ export default function piXFooter(pi: ExtensionAPI): void {
 			exec: (command, args, options) => pi.exec(command, args, options),
 		});
 		usageManager.sessionStart(createUsageContext(ctx));
-		installFooter(ctx, config);
+		installPresentation(ctx, config);
 	};
 
 	const saveAndApply = async (
@@ -94,8 +104,7 @@ export default function piXFooter(pi: ExtensionAPI): void {
 		const loaded = loadConfig({ projectRoot: ctx.cwd });
 		try {
 			saveConfig(loaded.globalPath, config);
-			if (ctx.mode === "tui") applyRuntimeConfig(ctx, config);
-			else activeConfig = config;
+			applyRuntimeConfig(ctx, config);
 			ctx.ui.notify(message, "info");
 		} catch {
 			ctx.ui.notify("无法保存 pi-x-footer 配置，原配置未改变。", "error");
@@ -186,8 +195,7 @@ export default function piXFooter(pi: ExtensionAPI): void {
 					}
 				};
 				const next = await runFooterWizard(current, wizardUI, save);
-				if (ctx.mode === "tui") applyRuntimeConfig(ctx, next);
-				else activeConfig = next;
+				applyRuntimeConfig(ctx, next);
 				ctx.ui.notify("pi-x-footer 配置已更新。", "info");
 				return;
 			}
@@ -199,8 +207,9 @@ export default function piXFooter(pi: ExtensionAPI): void {
 		},
 	});
 
+	// The pipeline runs in every host. Only the presentation differs, and `installPresentation` is
+	// where that is decided.
 	pi.on("session_start", (_event, ctx) => {
-		if (ctx.mode !== "tui") return;
 		stopUsage();
 		if (repositoryActive) repositoryData.sessionShutdown();
 		repositoryActive = false;
@@ -237,6 +246,7 @@ export default function piXFooter(pi: ExtensionAPI): void {
 		repositoryData.sessionShutdown();
 		repositoryActive = false;
 		activeConfig = undefined;
+		widget.stop(ctx);
 		if (ctx.mode === "tui") ctx.ui.setFooter(undefined);
 	});
 

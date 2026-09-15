@@ -70,12 +70,35 @@ export function createSessionDataSource(store: FooterStore): SessionDataSource {
 	};
 }
 
+/**
+ * What to call a provider in a line of text. The ids are Pi's; these are how the plans present
+ * themselves, which is what a reader recognises. Anything not listed keeps its id.
+ */
+const PROVIDER_LABEL: Record<string, string> = {
+	"openai-codex": "Codex",
+	"opencode-go": "OpenCode Go",
+	"volcengine-agent-plan": "Agent Plan",
+	"volcengine-coding-plan": "Coding Plan",
+	anthropic: "Anthropic",
+	openai: "OpenAI",
+	google: "Google",
+};
+
+export function providerLabelFor(provider: string): string {
+	return PROVIDER_LABEL[provider] ?? provider;
+}
+
 export function sessionSnapshotFromContext(
 	context: SessionContext,
 	isStreaming = false,
 ): SessionSnapshot {
 	return {
-		...(context.model?.provider ? { provider: context.model.provider } : {}),
+		...(context.model?.provider
+			? {
+					provider: context.model.provider,
+					providerLabel: providerLabelFor(context.model.provider),
+				}
+			: {}),
 		...(context.model?.id ? { model: context.model.id } : {}),
 		...(context.thinkingLevel ? { thinkingLevel: context.thinkingLevel } : {}),
 		...(context.home ? { home: context.home } : {}),

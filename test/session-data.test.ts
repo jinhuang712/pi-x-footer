@@ -22,11 +22,19 @@ describe("session data", () => {
 	it("maps the active context to a session snapshot", () => {
 		expect(sessionSnapshotFromContext(baseContext())).toEqual({
 			provider: "openai-codex",
+			providerLabel: "Codex",
 			model: "gpt-5.6",
 			thinkingLevel: "high",
 			cwd: "/workspace/project",
 			isStreaming: false,
 		});
+	});
+
+	it("names a provider it does not recognise after its id", () => {
+		const snapshot = sessionSnapshotFromContext(
+			baseContext({ model: { provider: "some-gateway", id: "m" } }),
+		);
+		expect(snapshot.providerLabel).toBe("some-gateway");
 	});
 
 	it("carries an explicit home directory for path shortening", () => {

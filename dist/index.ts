@@ -4939,9 +4939,24 @@ function createSessionDataSource(store) {
     }
   };
 }
+var PROVIDER_LABEL = {
+  "openai-codex": "Codex",
+  "opencode-go": "OpenCode Go",
+  "volcengine-agent-plan": "Agent Plan",
+  "volcengine-coding-plan": "Coding Plan",
+  anthropic: "Anthropic",
+  openai: "OpenAI",
+  google: "Google"
+};
+function providerLabelFor(provider) {
+  return PROVIDER_LABEL[provider] ?? provider;
+}
 function sessionSnapshotFromContext(context, isStreaming = false) {
   return {
-    ...context.model?.provider ? { provider: context.model.provider } : {},
+    ...context.model?.provider ? {
+      provider: context.model.provider,
+      providerLabel: providerLabelFor(context.model.provider)
+    } : {},
     ...context.model?.id ? { model: context.model.id } : {},
     ...context.thinkingLevel ? { thinkingLevel: context.thinkingLevel } : {},
     ...context.home ? { home: context.home } : {},
@@ -4959,6 +4974,45 @@ function safeHomedir() {
 function runtimeModeFromContext(mode) {
   if (mode === "tui" || mode === "rpc" || mode === "print" || mode === "json") return mode;
   return "unknown";
+}
+
+// src/host/widget.ts
+var WIDGET_USAGE_KEY = "footer:usage/v1";
+function wantsWidgets(ctx) {
+  return ctx.hasUI && ctx.mode !== "tui";
+}
+function usagePayload(snapshot) {
+  const usage = snapshot.providerUsage;
+  if (!usage) return void 0;
+  const label = snapshot.session.providerLabel;
+  return label === void 0 ? { ...usage } : { ...usage, providerLabel: label };
+}
+function createWidgetPublisher(store) {
+  let unsubscribe;
+  let published;
+  const publish = (ctx) => {
+    const payload = usagePayload(store.getSnapshot());
+    const encoded = payload ? JSON.stringify(payload) : void 0;
+    if (encoded === published) return;
+    published = encoded;
+    ctx.ui.setWidget(WIDGET_USAGE_KEY, encoded === void 0 ? void 0 : [encoded]);
+  };
+  const stop = (ctx) => {
+    unsubscribe?.();
+    unsubscribe = void 0;
+    if (published === void 0) return;
+    published = void 0;
+    if (wantsWidgets(ctx)) ctx.ui.setWidget(WIDGET_USAGE_KEY, void 0);
+  };
+  return {
+    start(ctx) {
+      stop(ctx);
+      if (!wantsWidgets(ctx)) return;
+      publish(ctx);
+      unsubscribe = store.subscribe(() => publish(ctx));
+    },
+    stop
+  };
 }
 
 // src/render/renderer.ts
@@ -5866,6 +5920,7 @@ function piXFooter(pi) {
   const repositoryData = createRepositoryDataSource(store, {
     exec: (command, args, options) => pi.exec(command, args, options)
   });
+  const widget = createWidgetPublisher(store);
   let usageManager;
   let activeConfig;
   let repositoryActive = false;
@@ -5873,19 +5928,20 @@ function piXFooter(pi) {
     usageManager?.sessionShutdown();
     usageManager = void 0;
   };
-  const installFooter = (ctx, config) => {
-    if (ctx.mode !== "tui" || !config.enabled) {
-      if (ctx.mode === "tui") ctx.ui.setFooter(void 0);
+  const installPresentation = (ctx, config) => {
+    if (ctx.mode === "tui") {
+      ctx.ui.setFooter(
+        config.enabled ? (tui, theme) => new FooterComponent({
+          store,
+          config,
+          theme,
+          tui
+        }) : void 0
+      );
       return;
     }
-    ctx.ui.setFooter(
-      (tui, theme) => new FooterComponent({
-        store,
-        config,
-        theme,
-        tui
-      })
-    );
+    if (config.enabled) widget.start(ctx);
+    else widget.stop(ctx);
   };
   const applyRuntimeConfig = (ctx, config) => {
     activeConfig = config;
@@ -5895,7 +5951,7 @@ function piXFooter(pi) {
         repositoryData.sessionShutdown();
         repositoryActive = false;
       }
-      installFooter(ctx, config);
+      installPresentation(ctx, config);
       return;
     }
     if (!repositoryActive) {
@@ -5909,14 +5965,13 @@ function piXFooter(pi) {
       exec: (command, args, options) => pi.exec(command, args, options)
     });
     usageManager.sessionStart(createUsageContext(ctx));
-    installFooter(ctx, config);
+    installPresentation(ctx, config);
   };
   const saveAndApply = async (ctx, config, message) => {
     const loaded = loadConfig({ projectRoot: ctx.cwd });
     try {
       saveConfig(loaded.globalPath, config);
-      if (ctx.mode === "tui") applyRuntimeConfig(ctx, config);
-      else activeConfig = config;
+      applyRuntimeConfig(ctx, config);
       ctx.ui.notify(message, "info");
     } catch {
       ctx.ui.notify("\u65E0\u6CD5\u4FDD\u5B58 pi-x-footer \u914D\u7F6E\uFF0C\u539F\u914D\u7F6E\u672A\u6539\u53D8\u3002", "error");
@@ -5993,8 +6048,7 @@ ${XFOOTER_HELP}`, "error");
           }
         };
         const next2 = await runFooterWizard(current, wizardUI, save);
-        if (ctx.mode === "tui") applyRuntimeConfig(ctx, next2);
-        else activeConfig = next2;
+        applyRuntimeConfig(ctx, next2);
         ctx.ui.notify("pi-x-footer \u914D\u7F6E\u5DF2\u66F4\u65B0\u3002", "info");
         return;
       }
@@ -6005,7 +6059,6 @@ ${XFOOTER_HELP}`, "error");
     }
   });
   pi.on("session_start", (_event, ctx) => {
-    if (ctx.mode !== "tui") return;
     stopUsage();
     if (repositoryActive) repositoryData.sessionShutdown();
     repositoryActive = false;
@@ -6035,6 +6088,7 @@ ${XFOOTER_HELP}`, "error");
     repositoryData.sessionShutdown();
     repositoryActive = false;
     activeConfig = void 0;
+    widget.stop(ctx);
     if (ctx.mode === "tui") ctx.ui.setFooter(void 0);
   });
   pi.on("message_update", (_event, ctx) => {
