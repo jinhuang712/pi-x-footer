@@ -1,8 +1,8 @@
-# pi-x-footer 开发规范
+# pid-footer 开发规范
 
 ## 1. 项目定位
 
-`pi-x-footer` 是一个 Footer-only 的 Pi Extension，核心目标是提供：
+`pid-footer` 是一个 Footer-only 的 Pi Extension，核心目标是提供：
 
 - 可配置的多行 Footer。
 - 响应式宽度适配。
@@ -177,8 +177,10 @@ v0.1 明确不做：
 
 ## 8. 配置和兼容性
 
-- 全局配置路径：`~/.pi/agent/pi-x-footer.json`。
-- 项目配置路径：`<project>/.pi/pi-x-footer.json`。
+- 全局配置路径：`~/.pi/agent/pid-footer.json`。
+- 项目配置路径：`<project>/.pi/pid-footer.json`。
+- 扩展改名前叫 `pi-x-footer`，旧文件名 `pi-x-footer.json` 仍然会被读取：同目录下两份都在时以新名为准，
+  只有旧名时照读不误。写入一律写新名，不迁移、不删除旧文件——那是用户的文件。
 - 项目配置默认关闭。
 - 配置必须经过校验，写入必须使用原子替换。
 - 非法配置不得破坏上一份有效配置。

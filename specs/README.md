@@ -1,10 +1,10 @@
-# pi-x-footer Specifications
+# pid-footer Specifications
 
 Status: Draft for implementation planning
 
 ## Purpose
 
-This directory contains the product specification, technical design, acceptance criteria, and staged implementation plan for `pi-x-footer`.
+This directory contains the product specification, technical design, acceptance criteria, and staged implementation plan for `pid-footer`.
 
 The project is a Footer-only Pi extension. Its differentiators are:
 
@@ -22,7 +22,7 @@ The project is a Footer-only Pi extension. Its differentiators are:
 4. [03-layout-rendering.md](./03-layout-rendering.md) — multi-row layout and responsive rendering.
 5. [04-color-themes.md](./04-color-themes.md) — colors, styles, icons, and accessibility.
 6. [05-provider-usage.md](./05-provider-usage.md) — Codex and OpenCode Go usage monitoring.
-7. [06-config-commands.md](./06-config-commands.md) — configuration files, presets, and `/xfooter`.
+7. [06-config-commands.md](./06-config-commands.md) — configuration files, presets, and `/footer`.
 8. [07-lifecycle-performance-security.md](./07-lifecycle-performance-security.md) — lifecycle, performance, privacy, and conflicts.
 9. [08-testing-acceptance.md](./08-testing-acceptance.md) — test strategy and release gates.
 10. [09-implementation-plan.md](./09-implementation-plan.md) — phased implementation plan.
@@ -38,7 +38,7 @@ The project is a Footer-only Pi extension. Its differentiators are:
 
 ## Decisions already made
 
-- `pi-x-footer` replaces only the Footer through `ctx.ui.setFooter(...)`.
+- `pid-footer` replaces only the Footer through `ctx.ui.setFooter(...)`.
 - Multi-row layout is a first-class feature, not a later enhancement.
 - Default style uses text, semantic colors, and ordinary separators; Emoji and Powerline are opt-in.
 - Color is part of the information model, not only decoration.

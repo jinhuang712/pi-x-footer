@@ -1,7 +1,7 @@
 # Settings UI Redesign Specification
 
 Status: Implemented (`src/commands.ts`, `src/settings-ui.ts`)
-Scope: `/xfooter` 设置信息架构、Preset/Custom 边界、键盘交互、即时保存和设置项合并  
+Scope: `/footer` 设置信息架构、Preset/Custom 边界、键盘交互、即时保存和设置项合并  
 Related: [11-settings-design.md](./11-settings-design.md)（设置与渲染效果手册）
 
 ## 实现备注
@@ -233,7 +233,7 @@ Footer
 
 ### Show Footer
 
-控制整个 pi-x-footer 是否显示。关闭时，根菜单中的其他设置会显示为禁用状态，不能进入或修改；重新打开 Footer 后恢复可用。
+控制整个 pid-footer 是否显示。关闭时，根菜单中的其他设置会显示为禁用状态，不能进入或修改；重新打开 Footer 后恢复可用。
 
 ### Project-specific settings
 

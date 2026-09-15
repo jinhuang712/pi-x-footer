@@ -1,15 +1,15 @@
-# pi-x-footer
+# pid-footer
 
 A configurable, information-dense multi-row Footer for Pi.
 
 <p align="center">
-  <a href="./assets/main.png"><img src="./assets/main.png" alt="pi-x-footer Components settings and live Footer preview" width="100%"></a>
+  <a href="./assets/main.png"><img src="./assets/main.png" alt="pid-footer Components settings and live Footer preview" width="100%"></a>
 </p>
 
 ## Installation
 
 ```bash
-pi install git:github.com/jinhuang712/pi-x-footer
+pi install git:github.com/jinhuang712/pid-footer
 ```
 
 For reload, local development, and removal, see [INSTALL](./docs/INSTALL.md).

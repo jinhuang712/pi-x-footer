@@ -45,7 +45,7 @@ MUST:
 - Load and validate configuration.
 - Create the state store and data managers.
 - Register the Footer through `ctx.ui.setFooter(...)`.
-- Register `/xfooter` commands.
+- Register `/footer` commands.
 - Subscribe to lifecycle changes.
 - Dispose all timers, subscriptions, and pending requests.
 
@@ -163,6 +163,6 @@ The package SHOULD follow Pi extension packaging conventions:
 
 ## 7. Footer conflict policy
 
-`pi-x-footer` replaces the final Footer renderer. Another Footer-replacing extension may overwrite it depending on load order.
+`pid-footer` replaces the final Footer renderer. Another Footer-replacing extension may overwrite it depending on load order.
 
 The README MUST warn users not to enable `pi-statusline`, `pi-powerline-footer`, or another Footer replacement at the same time. `pi-usage` is not a Footer replacement and may coexist, although duplicate provider polling should be documented if both implement the same usage source.

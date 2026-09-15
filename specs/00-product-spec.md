@@ -2,7 +2,7 @@
 
 ## 1. Product definition
 
-`pi-x-footer` is a focused Pi extension that replaces the default Footer with a configurable, information-dense, readable Footer.
+`pid-footer` is a focused Pi extension that replaces the default Footer with a configurable, information-dense, readable Footer.
 
 It should answer four questions without opening a menu:
 
@@ -60,7 +60,7 @@ After installing the extension, the user sees a four-row Footer with no required
 
 ### S-2: Configure multiple rows
 
-The user edits `~/.pi/agent/pi-x-footer.json` and adds or reorders rows. The next Footer render uses the new layout after validation and reload.
+The user edits `~/.pi/agent/pid-footer.json` and adds or reorders rows. The next Footer render uses the new layout after validation and reload.
 
 ### S-3: Narrow terminal
 
@@ -84,7 +84,7 @@ When the active provider is OpenCode Go, the Footer maps its rolling window to t
 
 ### S-8: Project configuration opt-in
 
-A repository may contain `.pi/pi-x-footer.json`, but the file is ignored unless the global setting explicitly enables project overrides.
+A repository may contain `.pi/pid-footer.json`, but the file is ignored unless the global setting explicitly enables project overrides.
 
 ## 5. Default user-facing layout
 
@@ -115,7 +115,7 @@ The default MUST NOT contain Emoji or Powerline separators. A user MAY enable th
 | FR-008 | Fit content responsively per row. | Must |
 | FR-009 | Provide global JSON configuration. | Must |
 | FR-010 | Support project configuration with an opt-in gate. | Must |
-| FR-011 | Provide `/xfooter` configuration and refresh commands. | Should |
+| FR-011 | Provide `/footer` configuration and refresh commands. | Should |
 | FR-012 | Provide compact, balanced, and detailed presets. | Should |
 | FR-013 | Degrade to monochrome and plain ASCII safely. | Must |
 | FR-014 | Avoid blocking the Pi event loop with data collection. | Must |

@@ -13,7 +13,7 @@ The Footer has four modes:
 
 `compact`, `balanced`, and `detailed` are immutable built-in presets. Compact uses a two-row overview/session layout; Balanced and Detailed share the default four-row structure. They each own their layout and Segment presentation. A fresh installation starts in `custom` with the current default profile. Selecting `custom` is also the entry point for editing Layout and Components settings.
 
-Use `/xfooter compact`, `/xfooter balanced`, or `/xfooter detailed` to apply a mode. The interactive settings menu can switch modes under `General → Mode`.
+Use `/footer compact`, `/footer balanced`, or `/footer detailed` to apply a mode. The interactive settings menu can switch modes under `General → Mode`.
 
 ## Layout by mode
 
@@ -37,9 +37,9 @@ The modes differ in Segment display detail rather than changing the meaning of t
 
 ## Segment detail
 
-Project display presets: `name` shows only the folder name (`pi-x-footer`),
-`tilde` shortens the home directory (`~/dev/pi/pi-x-footer`, the default),
-and `full` keeps the absolute path (`/Users/jin/dev/pi/pi-x-footer`).
+Project display presets: `name` shows only the folder name (`pid-footer`),
+`tilde` shortens the home directory (`~/dev/pi/pid-footer`, the default),
+and `full` keeps the absolute path (`/Users/jin/dev/pi/pid-footer`).
 Paths outside the home directory always fall back to the absolute form.
 
 | Segment | Compact | Balanced | Detailed |
@@ -74,6 +74,6 @@ The `provider_usage` Segment supports three display detail levels:
 | `standard` | Provider name, window labels, and percentages |
 | `detailed` | Standard values with reset countdowns when enabled |
 
-Window selection (`5h`, `Week (7d)`, `Month (30d)`) and reset visibility are configured independently under `/xfooter → Components → Usage`.
+Window selection (`5h`, `Week (7d)`, `Month (30d)`) and reset visibility are configured independently under `/footer → Components → Usage`.
 
 For the full configuration schema and rendering examples, see [Configuration and commands](../specs/06-config-commands.md), [Layout and rendering](../specs/03-layout-rendering.md), and [Settings Effects Manual](../specs/11-settings-design.md).

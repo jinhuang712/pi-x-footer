@@ -1,6 +1,22 @@
 # Changelog
 
-All notable changes to `pi-x-footer` are documented here.
+All notable changes to `pid-footer` are documented here.
+
+## [Unreleased]
+
+### Changed
+
+- **Renamed to `pid-footer`, and the command with it: `/xfooter` is now `/footer`.** The
+  configuration file follows — `pid-footer.json` — and the former `pi-x-footer.json` is still read
+  when no new file sits beside it, so an existing setup keeps working untouched. Writes always use
+  the new name and the old file is left where it is; it is the user's.
+
+### Added
+
+- **A graphical host gets the same numbers.** `setFooter()` takes a pi-tui component and only a
+  terminal can mount one, so outside a terminal the extension publishes the Snapshot Store's data as
+  a widget instead and lets the host draw it. One pipeline, one set of numbers, two renderers — the
+  footer in the terminal, a quota line in the window.
 
 ## [0.1.0] - 2026-09-01
 
@@ -15,7 +31,7 @@ All notable changes to `pi-x-footer` are documented here.
 - Renamed the built-in `minimal` mode to `compact`; the old name remains accepted as a legacy alias.
 - Compact, Balanced, and Detailed now share the same four-row content layout: Project/Provider, Git/Context, Usage/Cost, and Token/Cache; unavailable Provider Usage rows collapse without leaving gaps.
 - Simplified the settings model around immutable built-in presets and an explicit `custom` mode.
-- Rebuilt `/xfooter` around user-visible information blocks (`Appearance`, `Project`, `Git`, `Models & Providers`, `Usage`, `Context`, `Cache`, `Tokens`, `Cost`) instead of internal modules.
+- Rebuilt `/footer` around user-visible information blocks (`Appearance`, `Project`, `Git`, `Models & Providers`, `Usage`, `Context`, `Cache`, `Tokens`, `Cost`) instead of internal modules.
 - Preset mode is now fully read-only except for `Mode` and `Footer`; use `Mode → Custom` to edit other categories.
 - Reduced Segment configuration to visibility, labels, and a small set of content-specific options.
 - Cost now keeps the full input/output/cache read/cache write breakdown and exposes independent `compact` / `standard` / `full` display presets.
@@ -61,4 +77,4 @@ Initial dogfood release of the Footer-only Pi extension.
 - Local Context, token, cache, cost, Git, tool, and extension status Segments.
 - OpenAI Codex and OpenCode Go Provider Usage adapters with caching, stale state, timeout, cancellation, and official-origin checks.
 - Atomic configuration persistence and optional project overrides.
-- `/xfooter` settings, presets, refresh, status, and help commands.
+- `/footer` settings, presets, refresh, status, and help commands.

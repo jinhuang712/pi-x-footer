@@ -8,7 +8,7 @@
 ## Install from GitHub
 
 ```bash
-pi install git:github.com/jinhuang712/pi-x-footer
+pi install git:github.com/jinhuang712/pid-footer
 ```
 
 Run `/reload` in Pi after installation. Check the extension with:
@@ -40,8 +40,8 @@ pi -e .
 
 ```bash
 pi update --extensions
-pi update git:github.com/jinhuang712/pi-x-footer
-pi remove git:github.com/jinhuang712/pi-x-footer
+pi update git:github.com/jinhuang712/pid-footer
+pi remove git:github.com/jinhuang712/pid-footer
 ```
 
 Pi extensions run with full system access. Review the source before installing third-party packages. Do not enable another Footer replacement such as `pi-statusline` or `pi-powerline-footer` at the same time.

@@ -24,7 +24,7 @@ Use a mocked Pi context to verify:
 
 - Footer registration through `ctx.ui.setFooter`.
 - Lifecycle events update the Snapshot.
-- `/xfooter` commands validate and persist changes.
+- `/footer` commands validate and persist changes.
 - Provider refresh updates only provider usage data.
 - Shutdown cancels requests and timers.
 
@@ -126,7 +126,7 @@ enum row → ←/→ cycle value
 
 ### Configuration
 
-- The `/xfooter` flow is hierarchical rather than a linear questionnaire.
+- The `/footer` flow is hierarchical rather than a linear questionnaire.
 - The root menu shows a live plain-text Footer preview of the current configuration that updates after each confirmed change, together with a short Saved status line.
 - Mode and category choices include representative summaries.
 - Preset mode keeps every content category read-only; only `Mode` and `Footer` stay editable until the user confirms a switch to Custom.
@@ -140,7 +140,7 @@ enum row → ←/→ cycle value
 - Every preset selector contains no more than four choices; Usage Display contains exactly three choices.
 - Malformed configuration does not destroy the previous valid file.
 - Project configuration is ignored when the global opt-in is false.
-- `/xfooter refresh` does not mutate layout configuration.
+- `/footer refresh` does not mutate layout configuration.
 - Unknown command arguments do not write files.
 
 ### Scope

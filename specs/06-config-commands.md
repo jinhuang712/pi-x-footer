@@ -1,19 +1,19 @@
 # Configuration and Command Specification
 
-> Note: this document describes the JSON configuration file format and precedence, which remain accurate. The `/xfooter` settings menu itself has been rebuilt around the information architecture and interaction model in [12-settings-ui-redesign.md](./12-settings-ui-redesign.md) (implemented in `src/commands.ts`); that document supersedes section 9 of this file ("Configuration menu model") and the "editable in any mode" classification in section 6a, since Provider Usage and every other content category are now read-only outside Custom mode.
+> Note: this document describes the JSON configuration file format and precedence, which remain accurate. The `/footer` settings menu itself has been rebuilt around the information architecture and interaction model in [12-settings-ui-redesign.md](./12-settings-ui-redesign.md) (implemented in `src/commands.ts`); that document supersedes section 9 of this file ("Configuration menu model") and the "editable in any mode" classification in section 6a, since Provider Usage and every other content category are now read-only outside Custom mode.
 
 ## 1. Configuration locations
 
 Global configuration:
 
 ```text
-~/.pi/agent/pi-x-footer.json
+~/.pi/agent/pid-footer.json
 ```
 
 Optional project configuration:
 
 ```text
-<project-root>/.pi/pi-x-footer.json
+<project-root>/.pi/pid-footer.json
 ```
 
 Project configuration is ignored by default. It is read only when the global configuration contains:
@@ -222,22 +222,22 @@ projectOverrides.enabled
 Only edits to preset-owned settings switch the active mode to `custom`. Global preferences never change the mode.
 
 
-## 7. `/xfooter` commands
+## 7. `/footer` commands
 
 Supported forms:
 
 ```text
-/xfooter
-/xfooter toggle
-/xfooter compact
-/xfooter balanced
-/xfooter detailed
-/xfooter refresh
-/xfooter status
-/xfooter help
+/footer
+/footer toggle
+/footer compact
+/footer balanced
+/footer detailed
+/footer refresh
+/footer status
+/footer help
 ```
 
-### `/xfooter`
+### `/footer`
 
 Opens a hierarchical interactive configuration menu when a TUI is available. Pressing Enter confirms, validates, and persists each selected value immediately; there is no second Save step.
 
@@ -253,23 +253,23 @@ The root menu SHOULD expose:
 
 While a built-in preset is active, preset-owned entries are shown grayed out and locked with their current values. Select `custom` through `Mode` to edit them. Selecting a built-in mode loads its immutable layout and resets preset-owned settings.
 
-### `/xfooter toggle`
+### `/footer toggle`
 
 Toggles the extension's `enabled` setting and persists it atomically.
 
-### `/xfooter <preset>`
+### `/footer <preset>`
 
 Applies and persists a built-in preset.
 
-### `/xfooter refresh`
+### `/footer refresh`
 
 Requests an immediate refresh of provider usage and stale data sources. It MUST show a non-secret status or notification on failure.
 
-### `/xfooter status`
+### `/footer status`
 
 Reports active preset, enabled state, provider usage state, and config paths without displaying credentials.
 
-### `/xfooter help`
+### `/footer help`
 
 Prints concise usage information.
 
@@ -294,7 +294,7 @@ Writes MUST use a private temporary file followed by an atomic rename. A failed 
 The menu is intentionally hierarchical rather than a linear questionnaire, with two tiers:
 
 ```text
-/xfooter
+/footer
   ├─ Mode
   ├─ Enable Footer
   ├─ Layout          (preset-owned)

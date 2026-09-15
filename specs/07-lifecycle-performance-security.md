@@ -85,7 +85,7 @@ The extension SHOULD detect or document the possibility that another Footer repl
 The README MUST clearly state:
 
 ```text
-Do not enable pi-statusline or pi-powerline-footer at the same time as pi-x-footer.
+Do not enable pi-statusline or pi-powerline-footer at the same time as pid-footer.
 ```
 
 `pi-usage` can coexist because it does not replace the Footer, but users may see duplicate provider polling if both packages perform their own refresh.

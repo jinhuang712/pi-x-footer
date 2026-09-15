@@ -1,7 +1,7 @@
 # Settings Effects Manual
 
 Status: User-facing effects reference
-Scope: `/xfooter` 设置菜单中的每一项设置，以及它会让 Footer 变成什么样
+Scope: `/footer` 设置菜单中的每一项设置，以及它会让 Footer 变成什么样
 
 这份文档只回答一个问题：
 
@@ -144,7 +144,7 @@ Tokens: input ↓ 901k · output ↑ 63k · Cache: read 19.7m · write 0 · hit 
 ## 关闭
 
 ```text
-（pi-x-footer 不再渲染自己的 Footer）
+（pid-footer 不再渲染自己的 Footer）
 ```
 
 不会改变其他任何设置。重新开启后，原来的 Mode 和外观设置都还在。

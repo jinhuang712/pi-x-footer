@@ -216,13 +216,13 @@ Built-in, optional-failure provider usage display for Codex and OpenCode Go.
 - Provider usage is only queried for the active supported provider by default.
 - Late responses cannot overwrite newer session state.
 - Credentials never appear in test snapshots or logs.
-- `/xfooter refresh` can request a bounded refresh.
+- `/footer refresh` can request a bounded refresh.
 
 ## 10. Phase 8 — Commands and configuration UX
 
 ### Tasks
 
-- Implement `/xfooter` menu with preset-owned entries locked/grayed in built-in modes.
+- Implement `/footer` menu with preset-owned entries locked/grayed in built-in modes.
 - Expand Layout, Segment, Context, and Label style details only in `custom` mode.
 - Add a live plain-text Footer preview from the draft configuration.
 - Support `←`/`→` cycling for enum and toggle values alongside `↑`/`↓` navigation.
@@ -259,7 +259,7 @@ Users can manage common settings without manually editing JSON.
 
 ### Deliverable
 
-A publishable `pi-x-footer@0.1.0` package.
+A publishable `pid-footer@0.1.0` package.
 
 ## 12. Suggested implementation order inside the codebase
 

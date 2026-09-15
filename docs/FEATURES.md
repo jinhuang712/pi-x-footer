@@ -1,6 +1,6 @@
 # Features
 
-`pi-x-footer` replaces only Pi's Footer and leaves the editor, prompt queue, Bash mode, stash, and other UI areas unchanged.
+`pid-footer` replaces only Pi's Footer and leaves the editor, prompt queue, Bash mode, stash, and other UI areas unchanged.
 
 ## Footer content
 
@@ -28,17 +28,17 @@ The built-in Segments can show:
 
 ## Settings and commands
 
-`/xfooter` provides searchable `General`, `Components`, `Layout`, and `Appearance` settings. Components expose per-Segment visibility, display, Cost notation, and label controls. Changes save immediately; Layout movement is previewed first and saved when confirmed.
+`/footer` provides searchable `General`, `Components`, `Layout`, and `Appearance` settings. Components expose per-Segment visibility, display, Cost notation, and label controls. Changes save immediately; Layout movement is previewed first and saved when confirmed.
 
 Available commands:
 
 ```text
-/xfooter
-/xfooter toggle
-/xfooter compact|balanced|detailed
-/xfooter refresh
-/xfooter status
-/xfooter help
+/footer
+/footer toggle
+/footer compact|balanced|detailed
+/footer refresh
+/footer status
+/footer help
 ```
 
 Cost density and notation are independent: choose `compact`, `standard`, or `full` display, then choose `arrows`, `short`, or `full` notation. For the complete setting map and configuration behavior, see [Settings UI](../specs/12-settings-ui-redesign.md) and [Configuration and commands](../specs/06-config-commands.md).
