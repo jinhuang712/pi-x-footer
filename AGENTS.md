@@ -158,8 +158,10 @@ git log --oneline -3
 - 不得依赖 Pi 内部编译产物或私有 TUI API。
 - 在终端里不得使用 `setWidget()` 来绕过 Footer API。
 - 终端之外没有 Footer API 可用：`setFooter()` 要的是一个 pi-tui 组件，只有终端能挂载。所以
-  `ctx.hasUI && ctx.mode !== "tui"` 的宿主改走 `setWidget()`，键为 `footer:usage/v1`，内容是
-  Snapshot Store 里那份数据的 JSON。同一条管线、同一组数字，只是换谁来画。
+  `ctx.hasUI && ctx.mode !== "tui"` 的宿主改走 `setStatus()`，键为 `quota`，内容是同一份快照的
+  一行文本（沿用 Footer 的标签与百分比，不带颜色）。同一条管线、同一组数字，只是换谁来画。
+  不用 `setWidget()` 发结构化 JSON：宿主没认领那个 kind 时，窗口里显示的是 JSON 原文，
+  而“窗口里那行配额”本来就该是一行字。
 
 ## 7. 规格优先
 

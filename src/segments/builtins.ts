@@ -768,7 +768,7 @@ function providerUsageContent(
 	return { text: parts.map((part) => part.text).join(""), state, parts };
 }
 
-function formatResetDuration(milliseconds: number, detailed = false): string {
+export function formatResetDuration(milliseconds: number, detailed = false): string {
 	if (milliseconds <= 0) return "now";
 	const minutes = Math.ceil(milliseconds / 60_000);
 	if (minutes < 60) return `${minutes}m`;
@@ -784,7 +784,10 @@ function formatResetDuration(milliseconds: number, detailed = false): string {
 	return `${Math.ceil(hours / 24)}d`;
 }
 
-function usageWindowLabel(window: ProviderUsageSnapshot["windows"][number], short = false): string {
+export function usageWindowLabel(
+	window: ProviderUsageSnapshot["windows"][number],
+	short = false,
+): string {
 	switch (normalizeUsageWindow(window)) {
 		case "5h":
 		case "rolling":
@@ -818,7 +821,7 @@ function normalizeUsageWindow(
 	}
 }
 
-function providerUsageLabel(provider: string): string {
+export function providerUsageLabel(provider: string): string {
 	if (provider === "openai-codex") return "Codex";
 	if (provider === "opencode-go") return "OpenCode Go";
 	if (provider === "volcengine-agent-plan") return "Ark";

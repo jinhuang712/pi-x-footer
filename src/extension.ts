@@ -17,7 +17,6 @@ import type { FooterConfig } from "./config/types.js";
 import { createConversationDataSource } from "./data/conversation.js";
 import { createRepositoryDataSource } from "./data/repository.js";
 import { createSessionDataSource } from "./data/session.js";
-import { createWidgetPublisher } from "./host/widget.js";
 import { FooterComponent } from "./render/index.js";
 import {
 	editLayoutSettings,
@@ -26,6 +25,7 @@ import {
 	selectSettings,
 } from "./settings-ui.js";
 import { createFooterStore } from "./state/store.js";
+import { formatQuotaLine, STRIP_KEY } from "./strip.js";
 import { resolveRuntimeUsageAuth } from "./usage/auth.js";
 import { createUsageManager } from "./usage/manager.js";
 import type { UsageManager, UsageSessionContext } from "./usage/types.js";
@@ -37,9 +37,9 @@ export default function pidFooter(pi: ExtensionAPI): void {
 	const repositoryData = createRepositoryDataSource(store, {
 		exec: (command, args, options) => pi.exec(command, args, options),
 	});
-	const widget = createWidgetPublisher(store);
 	let usageManager: UsageManager | undefined;
 	let activeConfig: FooterConfig | undefined;
+	let unsubStrip: (() => void) | undefined;
 	let repositoryActive = false;
 
 	const stopUsage = () => {
@@ -49,8 +49,9 @@ export default function pidFooter(pi: ExtensionAPI): void {
 
 	/**
 	 * Install this host's presentation. A terminal gets the Footer; a host that draws but is not a
-	 * terminal gets the same snapshot as a widget, because `setFooter` hands back a pi-tui component
-	 * only a terminal can mount.
+	 * terminal gets the same snapshot as one strip line, because `setFooter` hands back a pi-tui
+	 * component only a terminal can mount. The pipeline upstream is host-agnostic by then — this
+	 * decides only who paints the numbers.
 	 */
 	const installPresentation = (ctx: ExtensionContext, config: FooterConfig) => {
 		if (ctx.mode === "tui") {
@@ -67,8 +68,39 @@ export default function pidFooter(pi: ExtensionAPI): void {
 			);
 			return;
 		}
-		if (config.enabled) widget.start(ctx);
-		else widget.stop(ctx);
+		if (config.enabled) startStrip(ctx, config);
+		else stopStrip(ctx);
+	};
+
+	/**
+	 * The strip is one line of the snapshot the footer draws, with the footer's own labels and no
+	 * colors: a window has no Footer API to mount, and a structured payload would arrive as raw JSON.
+	 * Nothing here fetches — `applyRuntimeConfig` already runs the usage manager in every host.
+	 */
+	const startStrip = (ctx: ExtensionContext, config: FooterConfig) => {
+		stopStrip();
+		if (!config.enabled || !config.usage.enabled) return;
+		const push = () => {
+			const line = formatQuotaLine(store.getSnapshot().providerUsage);
+			try {
+				ctx.ui.setStatus(STRIP_KEY, line);
+			} catch {
+				// The strip must never break the session.
+			}
+		};
+		unsubStrip = store.subscribe(push);
+		push();
+	};
+
+	const stopStrip = (ctx?: ExtensionContext) => {
+		unsubStrip?.();
+		unsubStrip = undefined;
+		if (!ctx || ctx.mode === "tui") return;
+		try {
+			ctx.ui.setStatus(STRIP_KEY, undefined);
+		} catch {
+			// Never break shutdown.
+		}
 	};
 
 	const applyRuntimeConfig = (ctx: ExtensionContext, config: FooterConfig) => {
@@ -246,7 +278,7 @@ export default function pidFooter(pi: ExtensionAPI): void {
 		repositoryData.sessionShutdown();
 		repositoryActive = false;
 		activeConfig = undefined;
-		widget.stop(ctx);
+		stopStrip(ctx);
 		if (ctx.mode === "tui") ctx.ui.setFooter(undefined);
 	});
 
